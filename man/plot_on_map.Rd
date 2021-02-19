@@ -34,7 +34,9 @@ This function takes in data on Swedish municipalities, and creates a plot of sai
 map of Sweden.
 }
 \examples{
-exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"), students = c("some", "many", "loads"))
+library(ggplot2)
+library(ggiraph)
+exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"),
+                          students = c("some", "many", "loads"))
 girafe(ggobj = plot_on_map(exampledata))
-
 }

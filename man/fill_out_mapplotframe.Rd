@@ -18,5 +18,8 @@ and adds a row for each municipality that is not present, with NA in the data co
 not have the name of a municipality in the first column.
 }
 \examples{
-fill_out_mapplotframe(data.frame(municipality = c("Stockholm", "Lund", "Uppsala"), students = c(23000, 32000, 33500)))
+fill_out_mapplotframe(data.frame(
+       municipality = c("Stockholm", "Lund", "Uppsala"),
+       students = c(23000, 32000, 33500)
+       ))
 }

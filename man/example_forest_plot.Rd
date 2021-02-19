@@ -12,6 +12,7 @@ plotting utilities, to create a plot of how large a proportion of the area of ea
 forests.
 }
 \examples{
+library(ggplot2)
+library(ggiraph)
 girafe(ggobj = example_forest_plot())
-
 }

@@ -7,7 +7,10 @@
 #' @param dat Data frame of partial data on municipalities
 #'
 #' @examples
-#' fill_out_mapplotframe(data.frame(municipality = c("Stockholm", "Lund", "Uppsala"), students = c(23000, 32000, 33500)))
+#' fill_out_mapplotframe(data.frame(
+#'        municipality = c("Stockholm", "Lund", "Uppsala"),
+#'        students = c(23000, 32000, 33500)
+#'        ))
 #' @return A data frame with one row for each municipality
 
 fill_out_mapplotframe <- function(dat) {
@@ -38,7 +41,10 @@ fill_out_mapplotframe <- function(dat) {
 #' @param legendTitle Title of the legend of the plot. If omitted, legend has no title - so don't omit this.
 #'
 #' @examples
-#' exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"), students = c("some", "many", "loads"))
+#' library(ggplot2)
+#' library(ggiraph)
+#' exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"),
+#'                           students = c("some", "many", "loads"))
 #' girafe(ggobj = plot_on_map(exampledata))
 #' @returns A ggplot object that can be turned into an interactive graphic with the girafe function, see the example.
 #'
@@ -108,6 +114,8 @@ plot_on_map <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legen
 #' forests.
 #'
 #' @examples
+#' library(ggplot2)
+#' library(ggiraph)
 #' girafe(ggobj = example_forest_plot())
 #' @export
 
