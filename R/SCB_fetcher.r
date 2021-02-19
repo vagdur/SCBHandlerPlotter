@@ -206,15 +206,15 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
   } else if (!is.na(TaxIncome) & TaxIncome) {
     # Skatteinkomster i tusen kronor.
     dat <- subset(
-      SCBdata$resultatrakning, region %in% Municipality,
-      resultaträkningsposter == "skatteintäkter"
+      SCBdata$resultatrakning, (region %in% Municipality)&
+      (resultaträkningsposter == "skatteintäkter")
     )
     return(sum(dat$X2019))
   } else if (!is.na(SubsidiesAndEqualisation) & SubsidiesAndEqualisation) {
     # Generella statsbidrag och utjämning.
     dat <- subset(
-      SCBdata$resultatrakning, region %in% Municipality,
-      resultaträkningsposter == "generella statsbidrag och utjämning"
+      SCBdata$resultatrakning, (region %in% Municipality)&
+      (resultaträkningsposter == "generella statsbidrag och utjämning")
     )
     return(sum(dat$X2019))
   } else if (!identical(NA, Education)) {
