@@ -1,0 +1,44 @@
+<?xml version = "1.0"?>
+
+<xs:schema xmlns:xs = "http://www.w3.org/2001/XMLSchema">
+    <xs:element name = 'table'><xs:complexType><xs:sequence>
+        <xs:element name = 'name' type='xs:token' />
+        <xs:element name = 'filename' type='xs:token' />
+        <xs:element name = 'description' type='xs:string' />
+        <xs:element name = 'source' type='xs:token' />
+        <xs:element name = 'year' type='xs:gYear' />
+
+        <xs:element name = 'columns'><xs:complexType><xs:sequence>
+            <xs:element name = 'column' type = 'ColumnType' minOccurs = '1' maxOccurs = 'unbounded' />
+            <xs:element name = 'valueColumn'><xs:complexType><xs:sequence>
+                <xs:element name = 'colname' type='xs:token' />
+            </xs:sequence></xs:complexType></xs:element>
+        </xs:sequence></xs:complexType></xs:element>
+    </xs:sequence></xs:complexType></xs:element>
+
+    <xs:complexType name = "ColumnType"><xs:sequence>
+        <xs:element name = 'identifier' type='xs:token' />
+        <xs:element name = 'colname' type='xs:token' />
+        <xs:element name = 'alias' type='xs:token' minOccurs = '0' maxOccurs = 'unbounded' />
+        <xs:element name = 'levels'><xs:complexType><xs:sequence>
+            <xs:element name = 'levelsType'>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="Municipalities"/>
+                        <xs:enumeration value="NumericRange"/>
+                        <xs:enumeration value="Character"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name = 'level' type = 'LevelType' minOccurs = '0' maxOccurs = 'unbounded' />
+            <xs:element name = 'minLevel' type = 'xs:integer' minOccurs = '0' maxOccurs = '1' />
+            <xs:element name = 'maxLevel' type = 'xs:integer' minOccurs = '0' maxOccurs = '1' /> 
+        </xs:sequence></xs:complexType></xs:element>
+    </xs:sequence></xs:complexType>
+
+    <xs:complexType name = "LevelType"><xs:sequence>
+        <xs:element name = 'levelName' type='xs:token'/>
+        <xs:element name = 'alias' type='xs:token' minOccurs = '0' maxOccurs = 'unbounded' />
+    </xs:sequence></xs:complexType>
+
+</xs:schema>
