@@ -36,8 +36,8 @@
 #' @param SchoolOrganiser
 #'
 #' @examples
-#' SCB(Municipality = "Värmdö", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
-#' SCB(Municipality = "Värmdö", LandUseClass = "total skogsmark")
+#' SCB(Municipality = "Stockholm", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
+#' SCB(Municipality = "Stockholm", LandUseClass = "total skogsmark")
 #'
 #' @return A number fetched from the requested table.
 #' @export
@@ -74,8 +74,6 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
                 SchoolOrganiser = NA # "Kommunal" eller "Enskild" för att filtrera
                                      # på huvudman för skolor.
                 ) {
-  load("R/sysdata.rda")
-
   ## En funktion för att hämta statistik ur SCBs tabeller. (Och en från Skolverket.)
   ## Lämnas en variabel som NA klumpas alla nivåer på den ihop (på relevant sätt
   ## beroende på mode), annars filtreras på den. Det är möjligt att ange flera

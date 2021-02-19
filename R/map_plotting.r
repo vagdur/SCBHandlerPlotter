@@ -5,7 +5,6 @@
 #'
 # Load map of Swedish municipalities: (Taken from the package swemaps, cf. github.com/reinholdsson/swemaps, which
 # in turn gets it from SCB.)
-load("R/sysdata.rda")
 
 fill_out_mapplotframe <- function(dat) {
   # Tar en dataframe av data för plottning på kartan,

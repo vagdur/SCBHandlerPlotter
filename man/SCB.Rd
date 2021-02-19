@@ -61,7 +61,7 @@ parameters will give the sum over all elements of the list, so \code{SCB(Municip
 would count the number of teenagers.
 }
 \examples{
-SCB(Municipality = "VÃ¤rmdÃ¶", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
-SCB(Municipality = "VÃ¤rmdÃ¶", LandUseClass = "total skogsmark")
+SCB(Municipality = "Stockholm", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
+SCB(Municipality = "Stockholm", LandUseClass = "total skogsmark")
 
 }
