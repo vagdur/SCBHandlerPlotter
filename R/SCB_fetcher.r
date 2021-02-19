@@ -12,6 +12,50 @@ SCBdata$hushallsstorlek <- read.csv("SCB/SCB_hushallsstorlek.csv",stringsAsFacto
 SCBdata$alderkon <- read.csv("SCB/SCB_alderkon.csv",stringsAsFactor=TRUE, fileEncoding="UTF8")
 SCBdata$gymnasiebehorighet <- read.csv("SCB/Skolverket_gymnasiebehorighet.csv", fileEncoding="UTF8")
 
+
+#' Fetch data from SCB tables
+#'
+#' This function reads data from the collected SCB tables. It infers which table to look at based on which
+#' parameters are set and which are not. So there are two types of parameter -- general ones which occur
+#' in several tables (Municipality, Gender, Age) and specific ones which occur only in one table. There are
+#' also specific parameters to fetch data from a table
+#' The function looks for a specific parameter set, and then looks at that table. If any parameter contained
+#' in the table -- general or specific -- is not set, it will sum over all possible values of that parameter.
+#' So, for example, \code{SCB(Municipality="Stockholm", Age=19, Gender="män", TotalPopulation=TRUE)} will return the
+#' number of 19-year-old men in Stockholm, while \code{SCB(Municipality="Stockholm", Gender="män", TotalPopulation=TRUE)}
+#' will return the total number of men, since it sums over all possible values of "Age". Similarly, passing a list of
+#' parameters will give the sum over all elements of the list, so \code{SCB(Municipality="Stockholm", Age=c(13:19), Gender="män", TotalPopulation=TRUE)}
+#' would count the number of teenagers.
+#'
+#' @param Municipality Municipality - general parameter, occurs in every table.
+#' @param Age Age - general parameter, occurs in all tables except land use, tax rate, and financial result
+#' @param Gender Gender - general parameter, occurs in all tables except land use, tax rate, and financial result
+#' @param BornInCountry Count people born in Sweden. Set to TRUE to count people born in Sweden and FALSE to count foreign-born people. Table also contains Age and Gender.
+#' @param HouseholdType Family structure of a household. Specific parameter. Table also contains HousingForm.
+#' @param HousingForm Housing type of a household, e.g. rented apartment or house. Table also contains HouseholdType.
+#' @param TotalHouseholds
+#' @param MaritalStatus
+#' @param HouseholdSize
+#' @param MunicipalTax
+#' @param RegionTax
+#' @param LandUseClass
+#' @param TotalArea
+#' @param MeanIncome
+#' @param MedianIncome
+#' @param TaxIncome
+#' @param SubsidiesAndEqualisation
+#' @param Education
+#' @param TotalPopulation
+#' @param TotalStudents
+#' @param HighSchoolEligible
+#' @param SchoolOrganiser
+#'
+#' @examples
+#' SCB(Municipality = "Värmdö", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
+#' SCB(Municipality = "Värmdö", LandUseClass = "total skogsmark")
+#'
+#' @return A number fetched from the requested table.
+#' @export
 SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
                 Age = NA, Gender = NA, # Dyker upp i flera tabeller, ibland
                                        # med olika nivåer.
@@ -50,14 +94,14 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
   ## beroende på mode), annars filtreras på den. Det är möjligt att ange flera
   ## nivåer, i vilket fall just de nivåerna klimpas ihop. Vilken tabell vi skall
   ## söka i avgörs beroende på vilka parametrar som satts till NA och inte.
-  
+
   # Municipality är en gemensam kolumn för alla tabellerna, så den kan vi ordna
   # redan nu:
   if (identical(NA,Municipality)) {
     Municipality = levels(SCBdata$boendeform$region)
   }
-  
-  
+
+
   # Hämtar ur alla SCB-tabellerna, så först behöver vi avgöra vilken
   # tabell vi skall hämta datan ur
   if (!identical(NA,BornInCountry) && is.logical(BornInCountry)) {
@@ -133,12 +177,12 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
                                   (markanvändningsklass %in% LandUseClass))
     return(sum(dat$X2015))
   } else if(!is.na(MeanIncome)&MeanIncome) {
-    # Genomsnittsinkomst. 
+    # Genomsnittsinkomst.
     # Om Age är NA returneras medelinkomst för 16+, andra alternativ
     # är "16-19 år", "20-24 år", samt "totalt 20+ år". Mer än en ålderskategori kan
     # inte anges.
     ## TODO: Implementera det nedan:
-    # Om man anger mer än en kommun returneras medelinkomsten över de kommunerna 
+    # Om man anger mer än en kommun returneras medelinkomsten över de kommunerna
     # - korrekt korrigerad för befolkningsstorlekar.
     if (is.na(Age)) {
       Age <- "totalt 16+ år"
@@ -177,12 +221,12 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     }
   } else if (!is.na(TaxIncome)&TaxIncome) {
     # Skatteinkomster i tusen kronor.
-    dat <- subset(SCBdata$resultatrakning, region %in% Municipality, 
+    dat <- subset(SCBdata$resultatrakning, region %in% Municipality,
                   resultaträkningsposter == "skatteintäkter")
     return(sum(dat$X2019))
   } else if (!is.na(SubsidiesAndEqualisation)&SubsidiesAndEqualisation) {
     # Generella statsbidrag och utjämning.
-    dat <- subset(SCBdata$resultatrakning, region %in% Municipality, 
+    dat <- subset(SCBdata$resultatrakning, region %in% Municipality,
                   resultaträkningsposter == "generella statsbidrag och utjämning")
     return(sum(dat$X2019))
   } else if (!identical(NA, Education)) {
@@ -227,7 +271,7 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (Gender == "kvinnor") {
       Gender <- "Flickor"
     }
-    
+
     dat <- subset(SCBdata$gymnasiebehorighet, (Kön %in% Gender) &
                                       (Huvudman %in% SchoolOrganiser) &
                                       (Kommun %in% Municipality))
@@ -247,11 +291,11 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (Gender == "kvinnor") {
       Gender <- "Flickor"
     }
-    
+
     dat <- subset(SCBdata$gymnasiebehorighet, (Kön %in% Gender) &
                     (Huvudman %in% SchoolOrganiser) &
                     (Kommun %in% Municipality))
-    
+
     return(sum(dat$AntalElever*(1-dat$AndelObehöriga/100)))
   } else {
     stop("Kan inte avgöra vad du letar efter för data.")
