@@ -36,44 +36,43 @@
 #' @param SchoolOrganiser
 #'
 #' @examples
-#' SCB(Municipality = "Stockholm", Age=24, Gender="kvinnor", MaritalStatus = "skilda")
+#' SCB(Municipality = "Stockholm", Age = 24, Gender = "kvinnor", MaritalStatus = "skilda")
 #' SCB(Municipality = "Stockholm", LandUseClass = "total skogsmark")
-#'
 #' @return A number fetched from the requested table.
 #' @export
 SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
                 Age = NA, Gender = NA, # Dyker upp i flera tabeller, ibland
-                                       # med olika nivåer.
+                # med olika nivåer.
                 BornInCountry = NA, # För data om inrikes/utrikes födda. TRUE
-                                    # ger antal inrikes födda, FALSE ger antal
-                                    # utrikes födda.
+                # ger antal inrikes födda, FALSE ger antal
+                # utrikes födda.
                 HouseholdType = NA, HousingForm = NA, # För boende- och hushållstyps-datan
                 TotalHouseholds = NA, # Sätt till TRUE för att få totalt antal hushåll
                 MaritalStatus = NA, # För datan om civilstånd - kan samköras med ålder
-                                    # och kön
+                # och kön
                 HouseholdSize = NA, # För data om hushållsstorlekar
                 MunicipalTax = NA, RegionTax = NA, # För data om skattesatser
                 LandUseClass = NA, # För data om markanvändning
                 TotalArea = NA, # Sätt till TRUE för att få total area av givna kommuner
                 MeanIncome = NA, MedianIncome = NA, # För data om invånarnas inkomster
-                                                    # Sätt till TRUE för denna typ av data.
+                # Sätt till TRUE för denna typ av data.
                 TaxIncome = NA, SubsidiesAndEqualisation = NA, # Skatteintäkter och
-                                                               # "generella statsbidrag och
-                                                               # utjämning". Sätt till TRUE.
+                # "generella statsbidrag och
+                # utjämning". Sätt till TRUE.
                 Education = NA, # För data om utbildningsnivå. Kan samköras med ålder
-                                # och kön, dock bara uppdelat i femårsklasser.
+                # och kön, dock bara uppdelat i femårsklasser.
                 TotalPopulation = NA, # Sätt till TRUE för att räkna total befolkning -
-                                     # kan delas upp på ålder och på kön. Notera att "100"
-                                     # i själva verket är alla åldrar över 99.
+                # kan delas upp på ålder och på kön. Notera att "100"
+                # i själva verket är alla åldrar över 99.
                 TotalStudents = NA, # Sätt till TRUE för att räkna antal elever som
-                                    # avslutade grundskolan
+                # avslutade grundskolan
                 HighSchoolEligible = NA, # Sätt till TRUE för att få antal elever som
-                                        # gick ut grundskolan och blev behöriga till
-                                        # gymnasiet. (Ej exakt -- räknas som procent
-                                        # gånger antal totalt.)
+                # gick ut grundskolan och blev behöriga till
+                # gymnasiet. (Ej exakt -- räknas som procent
+                # gånger antal totalt.)
                 SchoolOrganiser = NA # "Kommunal" eller "Enskild" för att filtrera
-                                     # på huvudman för skolor.
-                ) {
+                # på huvudman för skolor.
+) {
   ## En funktion för att hämta statistik ur SCBs tabeller. (Och en från Skolverket.)
   ## Lämnas en variabel som NA klumpas alla nivåer på den ihop (på relevant sätt
   ## beroende på mode), annars filtreras på den. Det är möjligt att ange flera
@@ -82,86 +81,86 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
 
   # Municipality är en gemensam kolumn för alla tabellerna, så den kan vi ordna
   # redan nu:
-  if (identical(NA,Municipality)) {
-    Municipality = levels(SCBdata$boendeform$region)
+  if (identical(NA, Municipality)) {
+    Municipality <- levels(SCBdata$boendeform$region)
   }
 
 
   # Hämtar ur alla SCB-tabellerna, så först behöver vi avgöra vilken
   # tabell vi skall hämta datan ur
-  if (!identical(NA,BornInCountry) && is.logical(BornInCountry)) {
+  if (!identical(NA, BornInCountry) && is.logical(BornInCountry)) {
     # Statistik om inrikes vs. utrikes födda önskas. Notera att
     # parametern måste vara TRUE eller FALSE, för siffror om inrikes
     # respektive utrikes födda. Att klumpa ihop de två hade ju bara gett
     # total befolkning.
-    if (identical(NA,Age)) {
+    if (identical(NA, Age)) {
       Age <- unique(SCBdata$inrikesvsutrikesfodda$ålder)
     }
-    if (identical(NA,Gender)) {
+    if (identical(NA, Gender)) {
       Gender <- levels(SCBdata$inrikesvsutrikesfodda$kön)
     }
     if (BornInCountry) {
-      dat <- subset(SCBdata$inrikesvsutrikesfodda, (födelseregion=="Född i Sverige")&
-                     (ålder %in% Age)&(kön %in% Gender)&(region %in% Municipality))
+      dat <- subset(SCBdata$inrikesvsutrikesfodda, (födelseregion == "Född i Sverige") &
+        (ålder %in% Age) & (kön %in% Gender) & (region %in% Municipality))
     } else {
-      dat <- subset(SCBdata$inrikesvsutrikesfodda, (födelseregion=="Utrikes född")&
-                       (ålder %in% Age)&(kön %in% Gender)&(region %in% Municipality))
+      dat <- subset(SCBdata$inrikesvsutrikesfodda, (födelseregion == "Utrikes född") &
+        (ålder %in% Age) & (kön %in% Gender) & (region %in% Municipality))
     }
     return(sum(dat$X2019))
-  } else if (!identical(NA, HouseholdType)|!identical(NA,HousingForm)|(!is.na(TotalHouseholds)&TotalHouseholds)) {
+  } else if (!identical(NA, HouseholdType) | !identical(NA, HousingForm) | (!is.na(TotalHouseholds) & TotalHouseholds)) {
     # Statistik om hushållstyp eller boendeform eller bägge samtidigt sökes. Ifall
     # TotalHouseholds är satt till TRUE returneras totalt antal hushåll i kommunerna.
     # Notera att output här är antal hushåll, inte antal individer.
-    if (identical(NA,HouseholdType)) {
+    if (identical(NA, HouseholdType)) {
       HouseholdType <- levels(SCBdata$boendeform$hushållstyp)
     }
-    if (identical(NA,HousingForm)) {
+    if (identical(NA, HousingForm)) {
       HousingForm <- levels(SCBdata$boendeform$boendeform)
     }
-    dat <- subset(SCBdata$boendeform, (region %in% Municipality)&
-                               (hushållstyp %in% HouseholdType)&
-                               (boendeform %in% HousingForm))
+    dat <- subset(SCBdata$boendeform, (region %in% Municipality) &
+      (hushållstyp %in% HouseholdType) &
+      (boendeform %in% HousingForm))
     return(sum(dat$X2019))
-  } else if (!identical(NA,MaritalStatus)) {
-    if (identical(NA,Age)) {
+  } else if (!identical(NA, MaritalStatus)) {
+    if (identical(NA, Age)) {
       Age <- unique(SCBdata$civilstand$ålder)
     }
-    if (identical(NA,Gender)) {
+    if (identical(NA, Gender)) {
       Gender <- levels(SCBdata$civilstand$kön)
     }
-    dat <- subset(SCBdata$civilstand, (region %in% Municipality)&
-                              (ålder %in% Age)&
-                              (kön %in% Gender)&
-                              (civilstånd %in% MaritalStatus))
+    dat <- subset(SCBdata$civilstand, (region %in% Municipality) &
+      (ålder %in% Age) &
+      (kön %in% Gender) &
+      (civilstånd %in% MaritalStatus))
     return(sum(dat$X2019))
   } else if (!identical(NA, HouseholdSize)) {
     # För data om hushållsstorlekar. Notera att denna funktionen
     # ger antal personer som bor i varje hushållsstorlek, inte
     # antal hushåll av varje given storlek.
-    dat <- subset(SCBdata$hushallsstorlek, (region %in% Municipality)&
-                                   (hushållsstorlek %in% HouseholdSize))
+    dat <- subset(SCBdata$hushallsstorlek, (region %in% Municipality) &
+      (hushållsstorlek %in% HouseholdSize))
     return(sum(dat$X2019))
-  } else if (!is.na(MunicipalTax)&MunicipalTax) {
+  } else if (!is.na(MunicipalTax) & MunicipalTax) {
     # Kommunskatt - vektoriserad, men kan vara förrädisk
     # om man försöker mata in mer än en kommun -- svaren
     # kommer ut i den ordning som kommunerna ligger i tabellen,
     # inte i den ordning man matade in kommunerna.
     SCBdata$kommunal_och_regionalskatt$Skattesats.till.kommun.2021[SCBdata$kommunal_och_regionalskatt$region %in% Municipality]
-  } else if (!is.na(RegionTax)&RegionTax) {
+  } else if (!is.na(RegionTax) & RegionTax) {
     # Regionskatt - förrädisk på samma vis som kommunskatt.
     SCBdata$kommunal_och_regionalskatt$Skattesats.till.region.2021[SCBdata$kommunal_och_regionalskatt$region %in% Municipality]
-  } else if (!identical(NA,LandUseClass)) {
+  } else if (!identical(NA, LandUseClass)) {
     # Data om landanvändning i kommunen. Notera att datan är från 2015.
-    dat <- subset(SCBdata$markanvandning, (region %in% Municipality)&
-                                  (markanvändningsklass %in% LandUseClass))
+    dat <- subset(SCBdata$markanvandning, (region %in% Municipality) &
+      (markanvändningsklass %in% LandUseClass))
     return(sum(dat$X2015))
-  } else if (!is.na(TotalArea)&TotalArea) {
+  } else if (!is.na(TotalArea) & TotalArea) {
     # Plocka ut kommunens totala area.
     LandUseClass <- "total landareal"
-    dat <- subset(SCBdata$markanvandning, (region %in% Municipality)&
-                                  (markanvändningsklass %in% LandUseClass))
+    dat <- subset(SCBdata$markanvandning, (region %in% Municipality) &
+      (markanvändningsklass %in% LandUseClass))
     return(sum(dat$X2015))
-  } else if(!is.na(MeanIncome)&MeanIncome) {
+  } else if (!is.na(MeanIncome) & MeanIncome) {
     # Genomsnittsinkomst.
     # Om Age är NA returneras medelinkomst för 16+, andra alternativ
     # är "16-19 år", "20-24 år", samt "totalt 20+ år". Mer än en ålderskategori kan
@@ -172,18 +171,18 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (is.na(Age)) {
       Age <- "totalt 16+ år"
     }
-    if (is.na(Gender)||setequal(Gender,c("män","kvinnor"))) {
+    if (is.na(Gender) || setequal(Gender, c("män", "kvinnor"))) {
       Gender <- "totalt"
     }
-    dat <- subset(SCBdata$inkomster, (region %in% Municipality)&
-                             (ålder %in% Age)&
-                             (kön %in% Gender))
-    if ((length(Municipality) == 1)&&(length(Age)==1)&&(length(Gender)==1)) {
+    dat <- subset(SCBdata$inkomster, (region %in% Municipality) &
+      (ålder %in% Age) &
+      (kön %in% Gender))
+    if ((length(Municipality) == 1) && (length(Age) == 1) && (length(Gender) == 1)) {
       return(dat$Medelinkomst..tkr.2018[1])
     } else {
       stop("Ännu inte implementerat att räkna ut medelinkomster över flera kommuner.")
     }
-  } else if(!is.na(MedianIncome)&MedianIncome) {
+  } else if (!is.na(MedianIncome) & MedianIncome) {
     # Medianinkomst.
     # Om Age är NA returneras medelinkomst för 16+, andra alternativ
     # är "16-19 år", "20-24 år", samt "totalt 20+ år". Mer än en ålderskategori kan
@@ -193,26 +192,30 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (is.na(Age)) {
       Age <- "totalt 16+ år"
     }
-    if (is.na(Gender)||setequal(Gender,c("män","kvinnor"))) {
+    if (is.na(Gender) || setequal(Gender, c("män", "kvinnor"))) {
       Gender <- "totalt"
     }
-    dat <- subset(SCBdata$inkomster, (region %in% Municipality)&
-                             (ålder %in% Age)&
-                             (kön %in% Gender))
-    if ((length(Municipality) == 1)&&(length(Age)==1)&&(length(Gender)==1)) {
+    dat <- subset(SCBdata$inkomster, (region %in% Municipality) &
+      (ålder %in% Age) &
+      (kön %in% Gender))
+    if ((length(Municipality) == 1) && (length(Age) == 1) && (length(Gender) == 1)) {
       return(dat$Medianinkomst..tkr.2018[1])
     } else {
       stop("Går inte att räkna ut medianinkomst för mer än en kommun.")
     }
-  } else if (!is.na(TaxIncome)&TaxIncome) {
+  } else if (!is.na(TaxIncome) & TaxIncome) {
     # Skatteinkomster i tusen kronor.
-    dat <- subset(SCBdata$resultatrakning, region %in% Municipality,
-                  resultaträkningsposter == "skatteintäkter")
+    dat <- subset(
+      SCBdata$resultatrakning, region %in% Municipality,
+      resultaträkningsposter == "skatteintäkter"
+    )
     return(sum(dat$X2019))
-  } else if (!is.na(SubsidiesAndEqualisation)&SubsidiesAndEqualisation) {
+  } else if (!is.na(SubsidiesAndEqualisation) & SubsidiesAndEqualisation) {
     # Generella statsbidrag och utjämning.
-    dat <- subset(SCBdata$resultatrakning, region %in% Municipality,
-                  resultaträkningsposter == "generella statsbidrag och utjämning")
+    dat <- subset(
+      SCBdata$resultatrakning, region %in% Municipality,
+      resultaträkningsposter == "generella statsbidrag och utjämning"
+    )
     return(sum(dat$X2019))
   } else if (!identical(NA, Education)) {
     # Utbildningsnivå.
@@ -223,12 +226,12 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (identical(NA, Gender)) {
       Gender <- levels(SCBdata$utbildningsniva$kön)
     }
-    dat <- subset(SCBdata$utbildningsniva, (region %in% Municipality)&
-                                   (ålder %in% Age)&
-                                   (kön %in% Gender)&
-                                   (utbildningsnivå %in% Education))
+    dat <- subset(SCBdata$utbildningsniva, (region %in% Municipality) &
+      (ålder %in% Age) &
+      (kön %in% Gender) &
+      (utbildningsnivå %in% Education))
     return(sum(dat$X2019))
-  } else if (!identical(NA,TotalPopulation)&TotalPopulation) {
+  } else if (!identical(NA, TotalPopulation) & TotalPopulation) {
     # Total befolkning i kommunerna. Kan uppdelas efter ålder
     # och kön.
     if (identical(NA, Age)) {
@@ -237,11 +240,11 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     if (identical(NA, Gender)) {
       Gender <- levels(SCBdata$alderkon$kön)
     }
-    dat <- subset(SCBdata$alderkon, (region %in% Municipality)&
-                            (ålder %in% Age)&
-                            (kön %in% Gender))
+    dat <- subset(SCBdata$alderkon, (region %in% Municipality) &
+      (ålder %in% Age) &
+      (kön %in% Gender))
     return(sum(dat$X2019))
-  } else if (!identical(NA, TotalStudents)&TotalStudents) {
+  } else if (!identical(NA, TotalStudents) & TotalStudents) {
     if (is.na(SchoolOrganiser)) {
       SchoolOrganiser <- "Samtliga"
     }
@@ -258,10 +261,10 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     }
 
     dat <- subset(SCBdata$gymnasiebehorighet, (Kön %in% Gender) &
-                                      (Huvudman %in% SchoolOrganiser) &
-                                      (Kommun %in% Municipality))
+      (Huvudman %in% SchoolOrganiser) &
+      (Kommun %in% Municipality))
     return(sum(dat$AntalElever))
-  } else if (!identical(NA, HighSchoolEligible)&HighSchoolEligible) {
+  } else if (!identical(NA, HighSchoolEligible) & HighSchoolEligible) {
     if (is.na(SchoolOrganiser)) {
       SchoolOrganiser <- "Samtliga"
     }
@@ -278,10 +281,10 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
     }
 
     dat <- subset(SCBdata$gymnasiebehorighet, (Kön %in% Gender) &
-                    (Huvudman %in% SchoolOrganiser) &
-                    (Kommun %in% Municipality))
+      (Huvudman %in% SchoolOrganiser) &
+      (Kommun %in% Municipality))
 
-    return(sum(dat$AntalElever*(1-dat$AndelObehöriga/100)))
+    return(sum(dat$AntalElever * (1 - dat$AndelObehöriga / 100)))
   } else {
     stop("Kan inte avgöra vad du letar efter för data.")
   }
@@ -306,17 +309,21 @@ VectorSCB <- function(VectorVar = "Municipality",
                       HighSchoolEligible = NA,
                       SchoolOrganiser = NA) {
   if (VectorVar == "Municipality") {
-    if (identical(NA,Municipality)) {
+    if (identical(NA, Municipality)) {
       Municipality <- levels(SCBdata$alderkon$region)
     }
-    retval <- sapply(Municipality, function(mun) SCB(Municipality = mun, Age, Gender,
-                                                     BornInCountry, HouseholdType, HousingForm,
-                                                     TotalHouseholds, MaritalStatus, HouseholdSize,
-                                                     MunicipalTax, RegionTax, LandUseClass,
-                                                     TotalArea, MeanIncome, MedianIncome,
-                                                     TaxIncome, SubsidiesAndEqualisation,
-                                                     Education, TotalPopulation, TotalStudents,
-                                                     HighSchoolEligible, SchoolOrganiser))
+    retval <- sapply(Municipality, function(mun) {
+      SCB(
+        Municipality = mun, Age, Gender,
+        BornInCountry, HouseholdType, HousingForm,
+        TotalHouseholds, MaritalStatus, HouseholdSize,
+        MunicipalTax, RegionTax, LandUseClass,
+        TotalArea, MeanIncome, MedianIncome,
+        TaxIncome, SubsidiesAndEqualisation,
+        Education, TotalPopulation, TotalStudents,
+        HighSchoolEligible, SchoolOrganiser
+      )
+    })
     return(retval)
   }
 }
