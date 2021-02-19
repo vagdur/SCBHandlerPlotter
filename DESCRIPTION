@@ -1,0 +1,15 @@
+Package: SCBHandlerPlotter
+Title: Handle and Plot SCB Data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Vilhelm",
+           family = "Agdur",
+           role = c("cre"),
+           email = "vilhelm.agdur@gmail.com",
+           comment = c(ORCID = "0000-0002-2278-6791"))
+Description: Provides a unified function to query data from several Statistics Sweden (SCB) tables, and functions to plot said data on maps.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
