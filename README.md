@@ -10,3 +10,13 @@ and to learn how large an area of forest there is in Värmdö municipality, one 
 despite these data points being in different tables.
 
 Additionally, it provides code for creating interactive map plots of data on Swedish municipalities, using the ggiraph package.
+
+## Setup
+
+The library can be installed using
+
+    devtools::install_github("vagdur/SCBHandlerPlotter")
+    
+## Data sources
+
+All tables except one are from SCB, one is from Skolverket. The map of Sweden is from SCB, via the package [swemaps](https://github.com/reinholdsson/swemaps).
