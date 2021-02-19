@@ -1,18 +1,3 @@
-SCBdata <- new.env()
-
-SCBdata$boendeform <- read.csv("SCB/SCB_boendeform.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$resultatrakning <- read.csv("SCB/SCB_resultatrakning.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$markanvandning <- read.csv("SCB/SCB_markanvandning.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$civilstand <- read.csv("SCB/SCB_civilstand.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$utbildningsniva <- read.csv("SCB/SCB_utbildningsniva.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$inkomster <- read.csv("SCB/SCB_inkomster.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$kommunal_och_regionalskatt <- read.csv("SCB/SCB_kommunal_och_regionalskatt.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$inrikesvsutrikesfodda <- read.csv("SCB/SCB_inrikesvsutrikesfodda.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$hushallsstorlek <- read.csv("SCB/SCB_hushallsstorlek.csv",stringsAsFactors = TRUE, fileEncoding="UTF8")
-SCBdata$alderkon <- read.csv("SCB/SCB_alderkon.csv",stringsAsFactor=TRUE, fileEncoding="UTF8")
-SCBdata$gymnasiebehorighet <- read.csv("SCB/Skolverket_gymnasiebehorighet.csv", fileEncoding="UTF8")
-
-
 #' Fetch data from SCB tables
 #'
 #' This function reads data from the collected SCB tables. It infers which table to look at based on which
@@ -89,6 +74,8 @@ SCB <- function(Municipality = NA, # Finns i alla tabeller, i samma format
                 SchoolOrganiser = NA # "Kommunal" eller "Enskild" för att filtrera
                                      # på huvudman för skolor.
                 ) {
+  load("R/sysdata.rda")
+
   ## En funktion för att hämta statistik ur SCBs tabeller. (Och en från Skolverket.)
   ## Lämnas en variabel som NA klumpas alla nivåer på den ihop (på relevant sätt
   ## beroende på mode), annars filtreras på den. Det är möjligt att ange flera
