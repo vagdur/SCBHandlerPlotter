@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>HighSchoolEligibility</name>
+    <filename>Skolverket_alderkon.csv</filename>
+    <description>A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private).</description>
+    <source>Skolverket</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>Kommun</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>Gender</identifier>
+            <colname>Kön</colname>
+            <alias>Kön</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>Pojkar</levelName>
+                    <alias>Men</alias>
+                    <alias>Boys</alias>
+                    <alias>Män</alias>
+                    <alias>Male</alias>
+                </level>
+                <level>
+                    <levelName>Flickor</levelName>
+                    <alias>Girls</alias>
+                    <alias>Women</alias>
+                    <alias>Kvinnor</alias>
+                    <alias>Female</alias>
+                </level>
+                <level>
+                    <levelName>Samtliga</levelName>
+                    <alias>Totalt</alias>
+                    <alias>Total</alias>
+                </level>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>SchoolOrganizer</identifier>
+            <colname>Huvudman</colname>
+            <alias>Huvudman</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>Kommunal</levelName>
+                    <alias>Municipal</levelName>
+                </level>
+                <level>
+                    <levelName>Enskild</levelName>
+                    <alias>Private</alias>
+                </level>
+                <level>
+                    <levelName>Samtliga</levelName>
+                    <alias>Totalt</alias>
+                    <alias>Total</alieas>
+                </level>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>HighSchoolEligibility</identifier>
+            <colname>Behörighet</colname>
+            <alias>HSEligibility</colname>
+            <alias>Gymnasiebehörighet</colname>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>Gymnasiebehöriga</levelName>
+                    <alias>True</alias>
+                    <alias>Behöriga</alias>
+                    <alias>Eligible</alias>
+                </level>
+                <level>
+                    <levelName>Gymnasieobehöriga</levelName>
+                    <alias>False</alias>
+                    <alias>Obehöriga</alias>
+                    <alias>Ineligible</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>Antal</colname>
+        </valueColumn>
+    </columns>
+</table>

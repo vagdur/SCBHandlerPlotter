@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>EducationLevel</name>
+    <filename>SCB_utbildningsniva.csv</filename>
+    <description>A table containing data on level of education, divided by age category and gender.</description>
+    <source>SCB</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>Age</identifier>
+            <colname>ålder</colname>
+            <alias>Ålder</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>16-24 år</levelName>
+                    <alias>16-24</alias>
+                </level>
+                <level>
+                    <levelName>25-34 år</levelName>
+                    <alias>25-34</alias>
+                </level>
+                <level>
+                    <levelName>35-44 år</levelName>
+                    <alias>35-44</alias>
+                </level>
+                <level>
+                    <levelName>45-54 år</levelName>
+                    <alias>45-54</alias>
+                </level>
+                <level>
+                    <levelName>55-64 år</levelName>
+                    <alias>55-64</alias>
+                </level>
+                <level>
+                    <levelName>65-74 år</levelName>
+                    <alias>65-74</alias>
+                </level>
+                <level>
+                    <levelName>75-84 år</levelName>
+                    <alias>75-84</alias>
+                </level>
+                <level>
+                    <levelName>85-94 år</levelName>
+                    <alias>85-94</alias>
+                </level>
+                <level>
+                    <levelName>95+ år</levelName>
+                    <alias>95+</alias>
+                </level>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>Gender</identifier>
+            <colname>kön</colname>
+            <alias>Kön</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>män</levelName>
+                    <alias>Men</alias>
+                    <alias>Män</alias>
+                    <alias>Male</alias>
+                </level>
+                <level>
+                    <levelName>kvinnor</levelName>
+                    <alias>Women</alias>
+                    <alias>Kvinnor</alias>
+                    <alias>Female</alias>
+                </level>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>EducationLevel</identifier>
+            <colname>utbildningsnivå</colname>
+            <alias>Utbildningsnivå</colname>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>eftergymnasial utbildning, 3 år eller mer</levelName>
+                    <alias>Tertiary education, 3+ years</alias>
+                </level>
+                <level>
+                    <levelName>eftergymnasial utbildning, mindre än 3 år</levelName>
+                    <alias>Tertiary education, less than 3 years</alias>
+                </level>
+                <level>
+                    <levelName>forskarutbildning</levelName>
+                    <alias>Postgraduate education</alias>
+                </level>
+                <level>
+                    <levelName>förgymnasial utbildning kortare än 9 år</levelName>
+                    <alias>Primary education, less than 9 years</alias>
+                </level>
+                <level>
+                    <levelName>förgymnasial utbildning, 9 (10) år</levelName>
+                    <alias>Primary education, 9 (10) years</alias>
+                </level>
+                <level>
+                    <levelName>gymnasial utbildning, 3 år</levelName>
+                    <alias>Secondary education, 3 years</alias>
+                </level>
+                <level>
+                    <levelName>gymnasial utbildning, högst 2 år</levelName>
+                    <alias>Secondary education, at most 2 years</alias>
+                </level>
+                <level>
+                    <levelName>uppgift om utbildningsnivå saknas</levelName>
+                    <alias>No information</alias>
+                    <alias>Uppgift saknas</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2019</colname>
+        </valueColumn>
+    </columns>
+</table>

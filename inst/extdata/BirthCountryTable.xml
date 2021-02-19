@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <table>
-    <name>MaritalStatus</name>
-    <filename>SCB_civilstand.csv</filename>
-    <description>A table containing data on marital status, divided by age, gender, and municipality.</description>
+    <name>BirthRegion</name>
+    <filename>SCB_inrikesvsutrikesfodda.csv</filename>
+    <description>A table containing data on country of birth (Sweden or not Sweden), divided by age and gender.</description>
     <source>SCB</source>
     <year>2019</year>
 
@@ -50,33 +50,22 @@
         </column>
 
         <column>
-            <identifier>MaritalStatus</identifier>
-            <colname>civilstånd</colname>
-            <alias>Civilstånd</alias>
+            <identifier>BirthRegion</identifier>
+            <colname>födelseregion</colname>
+            <alias>Födelseregion</alias>
             <levels>
                 <levelsType>Character</levelsType>
                 <level>
-                    <levelName>ogifta</levelName>
-                    <alias>Unmarried</alias>
-                    <alias>Never married</alias>
-                    <alias>Ogifta</alias>
-                    <alias>Aldrig gifta</alias>
+                    <levelName>Född i Sverige</levelName>
+                    <alias>Sverige</alias>
+                    <alias>Born in Sweden</alias>
+                    <alias>Sweden</alias>
                 </level>
                 <level>
-                    <levelName>gifta</levelName>
-                    <alias>Married</alias>
-                    <alias>Gifta</alias>
-                </level>
-                <level>
-                    <levelName>skilda</levelName>
-                    <alias>Divorced</alias>
-                    <alias>Skilda</alias>
-                </level>
-                <level>
-                    <levelName>änkor/änklingar</levelName>
-                    <alias>WidowErs</alias>
-                    <alias>Änk(or/lingar)</alias>
-                    <alias>Spouse deceased</alias>
+                    <levelName>Utrikes född</levelName>
+                    <alias>Inte Sverige</alias>
+                    <alias>Born outside Sweden</alias>
+                    <alias>Not Sweden</alias>
                 </level>
             </levels>
         </column>

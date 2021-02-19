@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <table>
-    <name>MaritalStatus</name>
-    <filename>SCB_civilstand.csv</filename>
-    <description>A table containing data on marital status, divided by age, gender, and municipality.</description>
+    <name>Incomes</name>
+    <filename>SCB_inkomster.csv</filename>
+    <description>A table containing data on mean and median income, divided by gender and some age categories.</description>
     <source>SCB</source>
-    <year>2019</year>
+    <year>2018</year>
 
     <columns>
         <column>
@@ -22,9 +22,25 @@
             <colname>ålder</colname>
             <alias>Ålder</alias>
             <levels>
-                <levelsType>NumericRange</levelsType>
-                <minLevel>12</minLevel>
-                <maxLevel>25</maxLevel>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>16-19 år</levelName>
+                    <alias>16-19</alias>
+                    <alias>16-19 y.o.</alias>
+                </level>
+                <level>
+                    <levelName>20-24 år</levelName>
+                    <alias>20-24</alias>
+                    <alias>20-24 y.o.</alias>
+                </level>
+                <level>
+                    <levelName>totalt 16+ år</levelName>
+                    <alias>Total 16+</alias>
+                </level>
+                <level>
+                    <levelName>totalt 20+ år</levelName>
+                    <alias>Total 20+</alias>
+                </level>
             </levels>
         </column>
 
@@ -46,43 +62,31 @@
                     <alias>Kvinnor</alias>
                     <alias>Female</alias>
                 </level>
+                <level>
+                    <levelName>totalt</levelName>
+                    <alias>Totalt</alias>
+                    <alias>Total</alias>
+                </level>
             </levels>
         </column>
 
         <column>
-            <identifier>MaritalStatus</identifier>
-            <colname>civilstånd</colname>
-            <alias>Civilstånd</alias>
+            <identifier>MeanOrMedian</identifier>
+            <colname>MedTyp</colname>
+            <alias>MedelvärdeEllerMedian</alias>
             <levels>
                 <levelsType>Character</levelsType>
                 <level>
-                    <levelName>ogifta</levelName>
-                    <alias>Unmarried</alias>
-                    <alias>Never married</alias>
-                    <alias>Ogifta</alias>
-                    <alias>Aldrig gifta</alias>
+                    <levelName>Medelvärde</levelName>
+                    <alias>Mean</alias>
                 </level>
                 <level>
-                    <levelName>gifta</levelName>
-                    <alias>Married</alias>
-                    <alias>Gifta</alias>
+                    <levelName>Median</levelName>
                 </level>
-                <level>
-                    <levelName>skilda</levelName>
-                    <alias>Divorced</alias>
-                    <alias>Skilda</alias>
-                </level>
-                <level>
-                    <levelName>änkor/änklingar</levelName>
-                    <alias>WidowErs</alias>
-                    <alias>Änk(or/lingar)</alias>
-                    <alias>Spouse deceased</alias>
-                </level>
-            </levels>
         </column>
 
         <valueColumn>
-            <colname>X2019</colname>
+            <colname>X2018</colname>
         </valueColumn>
     </columns>
 </table>

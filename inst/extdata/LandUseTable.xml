@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>LandUse</name>
+    <filename>SCB_alderkon.csv</filename>
+    <description>A table containing data on land use in each municipality.</description>
+    <source>SCB</source>
+    <year>2015</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>LandUseType</identifier>
+            <colname>markanvändningsklass</colname>
+            <alias>Markanvändningsklass</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>bebyggd mark och tillhörande mark</levelName>
+                    <alias>Bebyggd</alias>
+                    <alias>Built-upon and adherent land</alias>
+                    <alias>Buildings</alias>
+                </level>
+                <level>
+                    <levelName>betesmark</levelName>
+                    <alias>Betesmark</alias>
+                    <alias>Pasture</alias>
+                </level>
+                <level>
+                    <levelName>golfbanor och skidpistar</levelName>
+                    <alias>Golfbanor och skidpistar</alias>
+                    <alias>Golf courses and ski pistes</alias>
+                </level>
+                <level>
+                    <levelName>skogsmark, improduktiv</levelName>
+                    <alias>Improduktiv skogsmark</alias>
+                    <alias>Unproductive forest</alias>
+                </level>
+                <level>
+                    <levelName>skogsmark, produktiv</levelName>
+                    <alias>Produktiv skogsmark</alias>
+                    <alias>Productive forest</alias>
+                </level>
+                <level>
+                    <levelName>total landareal</levelName>
+                    <alias>Total area</alias>
+                </level>
+                <level>
+                    <levelName>total skogsmark</levelName>
+                    <alias>Skogsmark</alias>
+                    <alias>Forest</alias>
+                    <alias>Total forest</alias>
+                </level>
+                <level>
+                    <levelName>täkter och gruvområden</levelName>
+                    <alias>Täkter och gruvområden</alias>
+                    <alias>Borrows and mines</alias>
+                </level>
+                <level>
+                    <levelName>vatten</levelName>
+                    <alias>Vatten</alias>
+                    <alias>Water</alias>
+                </level>
+                <level>
+                    <levelName>åkermark</levelName>
+                    <alias>Åkermark</alias>
+                    <alias>Farmland</alias>
+                </level>
+                <level>
+                    <levelName>övrig mark</levelName>
+                    <alias>Övrig mark</alias>
+                    <alias>Other land</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2015</colname>
+        </valueColumn>
+    </columns>
+</table>

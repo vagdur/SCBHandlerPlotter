@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>HousingForm</name>
+    <filename>SCB_boendeform.csv</filename>
+    <description>A table containing data on how many households of a certain form (e.g. single male above 64, woman with child) live in a certain type of housing (e.g. condo, owned house).</description>
+    <source>SCB</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>HousingForm</identifier>
+            <colname>boendeform</colname>
+            <alias>Boendeform</alias>
+            <levels>
+                <levelsType>Character</levelsType>  
+                <level>
+                    <levelName>flerbostadshus, bostadsrätt</levelName>
+                    <alias>Multi-home house, condo</levelName>
+                </level>
+                <level>
+                    <levelName>flerbostadshus, hyresrätt</levelName>
+                    <alias>Multi-home house, rented</levelName>
+                </level>
+                <level>
+                    <levelName>småhus, bostadsrätt</levelName>
+                    <alias>Small house, condo</levelName>
+                </level>
+                <level>
+                    <levelName>småhus, hyresrätt</levelName>
+                    <alias>Small house, rented</levelName>
+                </level>
+                <level>
+                    <levelName>småhus, äganderätt</levelName>
+                    <alias>Small house, owned</alias>
+                </level>
+                <level>
+                    <levelName>specialbostad</levelName>
+                    <alias>Special housing</alias>
+                </level>
+                <level>
+                    <levelName>uppgift saknas</levelName>
+                    <alias>No information</alias>
+                </level>
+                <level>
+                    <levelName>övrigt boende</levelName>
+                    <alias>Other</alias>
+                    <alias>Övrigt</alias>
+                </level>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>HouseholdType</identifier>
+            <colname>hushållstyp</colname>
+            <alias>Hushållstyp</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>ensamstående kvinnor -64 år utan barn</levelName>
+                    <alias>Single women up to 64 without children</alias>
+                    <alias>Single F up to 64 w.o. children</alias>
+                </level>
+                <level>
+                    <levelName>ensamstående kvinnor 65- år utan barn</levelName>
+                    <alias>Single women above 64 without children</alias>
+                    <alias>Single F above 64 w.o. children</alias> 
+                </level>
+                <level>
+                    <levelName>ensamstående kvinnor med barn 0-24 år</levelName>
+                    <alias>Single women with children</alias>
+                    <alias>Single F w. childen</alias>
+                </level>
+                <level>
+                    <levelName>ensamstående män -64 år utan barn</levelName>
+                    <alias>Single men up to 64 without children</alias>
+                    <alias>Single M up to 64 w.o. childen</alias>
+                </level>
+                <level>
+                    <levelName>ensamstående män 65- år utan barn</levelName>
+                    <alias>Single men above 64 without children</alias>
+                    <alias>Single M above 64 w.o. children</alias>
+                </level>
+                <level>
+                    <levelName>ensamstående män med barn 0-24 år</levelName>
+                    <alias>Single men with children</alias>
+                    <alias>Single M with children</alias>
+                </level>
+                <level>
+                    <levelName>sammanboende med barn 0-24 år, 1 barn</levelName>
+                    <alias>Cohabiting with one child</alias>
+                </level>
+                <level>
+                    <levelName>sammanboende med barn 0-24 år, 2 barn</levelName>
+                    <alias>Cohabiting with two children</alias>
+                </level>
+                <level>
+                    <levelName>sammanboende med barn 0-24 år, 3+  barn</levelName>
+                    <alias>Cohabiting with 3+ children</alias>
+                </level>
+                <level>
+                    <levelName>sammanboende utan barn</levelName>
+                    <alias>Cohabiting without children</alias>
+                </level>
+                <level>
+                    <levelName>övriga hushåll med barn 0-24 år</levelName>
+                    <alias>Other households with children</alias>
+                </level>
+                <level>
+                    <levelName>övriga hushåll utan barn 0-24 år</levelName>
+                    <alias>Other households without childen</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2019</colname>
+        </valueColumn>
+    </columns>
+</table>

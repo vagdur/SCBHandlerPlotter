@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>MunicipalIncomeStatements</name>
+    <filename>SCB_resultatrakning.csv</filename>
+    <description>A table containing data on total tax income, and equalisation and subsidies, per municipality.</description>
+    <source>SCB</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>IncomeStatementPost</identifier>
+            <colname>resultaträkningspost</colname>
+            <alias>Resultaträkningspost</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>skatteintäkter</levelName>
+                    <alias>Skatteintäkter</alias>
+                    <alias>Tax income</alias>
+                </level>
+                <level>
+                    <levelName>generella statsbidrag och utjämning</levelName>
+                    <alias>SubsidiesAndEqualisation</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2019</colname>
+        </valueColumn>
+    </columns>
+</table>

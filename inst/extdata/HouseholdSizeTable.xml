@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>HouseholdSize</name>
+    <filename>SCB_hushallsstorlek.csv</filename>
+    <description>A table containing data on how many households of each given size there are in a municipality.</description>
+    <source>SCB</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>HouseholdSize</identifier>
+            <colname>hushållsstorlek</colname>
+            <alias>Hushållsstorlek</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>1 person</levelName>
+                    <alias>1</alias>
+                </level>
+                <level>
+                    <levelName>2 personer</levelName>
+                    <alias>2</alias>
+                    <alias>2 people</alias>
+                </level>
+                <level>
+                    <levelName>3 personer</levelName>
+                    <alias>3</alias>
+                    <alias>3 people</alias>
+                </level>
+                <level>
+                    <levelName>4 personer</levelName>
+                    <alias>4</alias>
+                    <alias>4 people</alias
+                </level>
+                <level>
+                    <levelName>5 personer</levelName>
+                    <alias>5</alias>
+                    <alias>5 people</alias>
+                </level>
+                <level>
+                    <levelName>6 personer</levelName>
+                    <alias>6</alias>
+                    <alias>6 people</alias>
+                </level>
+                <level>
+                    <levelName>7+ personer</levelName>
+                    <alias>7+</alias>
+                    <alias>7+ people</alias>
+                </level>
+                <level>
+                    <levelName>uppgift saknas</levelName>
+                    <alias>Information missing</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2019</colname>
+        </valueColumn>
+    </columns>
+</table>

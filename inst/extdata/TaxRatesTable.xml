@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<table>
+    <name>TaxRates</name>
+    <filename>SCB_kommunal_och_regionalskatt.csv</filename>
+    <description>A table containing data on municipal and regional tax rates.</description>
+    <source>SCB</source>
+    <year>2019</year>
+
+    <columns>
+        <column>
+            <identifier>Municipality</identifier>
+            <colname>region</colname>
+            <alias>Kommun</alias>
+            <levels>
+                <levelsType>Municipalities</levelsType>
+            </levels>
+        </column>
+
+        <column>
+            <identifier>MunicipalOrRegionalTax</identifier>
+            <colname>Nivå</colname>
+            <alias>KommunEllerRegionalskatt</alias>
+            <levels>
+                <levelsType>Character</levelsType>
+                <level>
+                    <levelName>Kommun</levelName>
+                    <alias>Municipal</alias>
+                </level>
+                <level>
+                    <levelName>Region</levelName>
+                    <alias>Regional</alias>
+                </level>
+            </levels>
+        </column>
+
+        <valueColumn>
+            <colname>X2019</colname>
+        </valueColumn>
+    </columns>
+</table>
