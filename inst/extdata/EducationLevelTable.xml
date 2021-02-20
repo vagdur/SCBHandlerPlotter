@@ -86,7 +86,7 @@
         <column>
             <identifier>EducationLevel</identifier>
             <colname>utbildningsnivå</colname>
-            <alias>Utbildningsnivå</colname>
+            <alias>Utbildningsnivå</alias>
             <levels>
                 <levelsType>Character</levelsType>
                 <level>

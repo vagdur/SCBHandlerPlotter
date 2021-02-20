@@ -53,7 +53,7 @@
                 <levelsType>Character</levelsType>
                 <level>
                     <levelName>Kommunal</levelName>
-                    <alias>Municipal</levelName>
+                    <alias>Municipal</alias>
                 </level>
                 <level>
                     <levelName>Enskild</levelName>
@@ -62,7 +62,7 @@
                 <level>
                     <levelName>Samtliga</levelName>
                     <alias>Totalt</alias>
-                    <alias>Total</alieas>
+                    <alias>Total</alias>
                 </level>
             </levels>
         </column>
@@ -70,8 +70,8 @@
         <column>
             <identifier>HighSchoolEligibility</identifier>
             <colname>Behörighet</colname>
-            <alias>HSEligibility</colname>
-            <alias>Gymnasiebehörighet</colname>
+            <alias>HSEligibility</alias>
+            <alias>Gymnasiebehörighet</alias>
             <levels>
                 <levelsType>Character</levelsType>
                 <level>

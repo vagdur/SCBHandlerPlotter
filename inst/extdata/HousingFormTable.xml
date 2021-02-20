@@ -25,19 +25,19 @@
                 <levelsType>Character</levelsType>  
                 <level>
                     <levelName>flerbostadshus, bostadsrätt</levelName>
-                    <alias>Multi-home house, condo</levelName>
+                    <alias>Multi-home house, condo</alias>
                 </level>
                 <level>
                     <levelName>flerbostadshus, hyresrätt</levelName>
-                    <alias>Multi-home house, rented</levelName>
+                    <alias>Multi-home house, rented</alias>
                 </level>
                 <level>
                     <levelName>småhus, bostadsrätt</levelName>
-                    <alias>Small house, condo</levelName>
+                    <alias>Small house, condo</alias>
                 </level>
                 <level>
                     <levelName>småhus, hyresrätt</levelName>
-                    <alias>Small house, rented</levelName>
+                    <alias>Small house, rented</alias>
                 </level>
                 <level>
                     <levelName>småhus, äganderätt</levelName>
