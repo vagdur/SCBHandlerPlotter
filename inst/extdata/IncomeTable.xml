@@ -83,6 +83,7 @@
                 <level>
                     <levelName>Median</levelName>
                 </level>
+            </levels>
         </column>
 
         <valueColumn>
