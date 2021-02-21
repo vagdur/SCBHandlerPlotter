@@ -25,12 +25,12 @@ checkFormatConformity <- function(filename) {
 
   # Then, let's check that it is valid XML:
   test_that(paste("file ",fileShortName," is properly formed XML"),{
-            parsedXML <- xml2::read_xml(filename)
+            parsedXML <- xml2::read_xml(filename, encoding="UTF-8")
             expect_true(exists("parsedXML"))
             })
   # Having done that, let's actually read it in, and also read in the XSD file containing our Schema.
-  parsedXML <- xml2::read_xml(filename)
-  xmlSchema <- xml2::read_xml(system.file("extdata", "TableDocumentationFormat.xsd", package = "SCBHandlerPlotter"))
+  parsedXML <- xml2::read_xml(filename, encoding="UTF-8")
+  xmlSchema <- xml2::read_xml(system.file("extdata", "TableDocumentationFormat.xsd", package = "SCBHandlerPlotter"), encoding="UTF-8")
 
   # Now, let's test that the XML matches the Schema:
   test_that(paste("file ",fileShortName," conforms to the XML Schema"), {
@@ -83,7 +83,7 @@ checkDocumentationCorrectness <- function(filename) {
   fileShortName <- basename(filename)
 
   # Knowing that the XML makes sense, we read it in and cast it to a super-nested list to work with:
-  parsedXML <- xml2::read_xml(filename)
+  parsedXML <- xml2::read_xml(filename, encoding="UTF-8")
   docList <- xml2::as_list(parsedXML)$table
 
   # The first thing to do is to find the csv file it says it documents and test that it exists:
@@ -96,7 +96,7 @@ checkDocumentationCorrectness <- function(filename) {
     return(FALSE)
   }
   # If it does exist, we can read it in:
-  dataTable <- read.csv(system.file("extdata",csvFilename, package="SCBHandlerPlotter"))
+  dataTable <- read.csv(system.file("extdata",csvFilename, package="SCBHandlerPlotter"), fileEncoding = "UTF-8")
 
   # Having read it in, we check the valueColumn specified exists and is numeric:
   docValueColumn <- docList$columns$valueColumn$colname[[1]][1]
@@ -112,6 +112,27 @@ checkDocumentationCorrectness <- function(filename) {
       expect_true(is.numeric(dataTable[,docValueColumn])) # expect_type doesn't work here since integers and floats are different types, but both give true here
     })
   }
+
+  # Now that we have picked out and validated the existence of the valueColumn, we can look at the rest of the columns,
+  # and validate each of them.
+  docColumns <- docList$columns
+  # Our first test, however, is just that we have the right number of columns -- that is, the number of objects inside the <columns>
+  # block is the same as the number of columns of the actual table. If they are equal, and we also check for each column in the XML
+  # that it corresponds to one in the real table, then we will know that we have a one-to-one correspondence between columns in the
+  # documentation and columns in the real table. (That column names are unique in the XML was checked already by checkFormatConformity,
+  # and uniqueness of column names in the data is enforced by R, possibly by renaming on read.)
+  test_that(paste("the number of columns documented in",fileShortName,"matches the number of columns in the data"),{
+    expect_equal(length(docColumns),ncol(dataTable))
+  })
+
+  for (columnNumber in 1:(length(docColumns) - 1)) { # -1 because the final column is the valueColumn, which we've already checked.
+    docColumn <- docColumns[[columnNumber]]
+    # Test that the column really exists:
+    test_that(paste("column",docColumn$colname[[1]][1],"documented by",fileShortName,"exists in actual data"),{
+      expect_true(docColumn$colname[[1]][1] %in% colnames(dataTable))
+    })
+  }
+
   # We need a return value here, so that the code executing this function can itself be a test. Otherwise the testing
   # will abort as soon as we get an error in here, and so not all XML files would get tested as soon as one fails. Thus:
   return(TRUE)
@@ -119,7 +140,7 @@ checkDocumentationCorrectness <- function(filename) {
 
 # Our very first test should be that we can actually read in the XML Schema we need to validate our XML files:
 test_that("XML Schema can be read",{
-  xmlSchema <- xml2::read_xml(system.file("extdata", "TableDocumentationFormat.xsd", package = "SCBHandlerPlotter"))
+  xmlSchema <- xml2::read_xml(system.file("extdata", "TableDocumentationFormat.xsd", package = "SCBHandlerPlotter"), encoding="UTF-8")
   expect_true(exists("xmlSchema"))
 })
 
