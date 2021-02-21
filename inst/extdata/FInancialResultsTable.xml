@@ -19,7 +19,7 @@
 
         <column>
             <identifier>IncomeStatementPost</identifier>
-            <colname>resultaträkningspost</colname>
+            <colname>resultaträkningsposter</colname>
             <alias>Resultaträkningspost</alias>
             <levels>
                 <levelsType>Character</levelsType>
