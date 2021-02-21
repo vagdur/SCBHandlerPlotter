@@ -2,7 +2,7 @@
 
 <table>
     <name>HighSchoolEligibility</name>
-    <filename>Skolverket_alderkon.csv</filename>
+    <filename>Skolverket_gymnasiebehorighet.csv</filename>
     <description>A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private).</description>
     <source>Skolverket</source>
     <year>2019</year>
