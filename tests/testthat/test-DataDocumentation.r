@@ -43,7 +43,6 @@ checkFormatConformity <- function(filename) {
     return(FALSE)
   }
 
-
   # Now the easy part of our testing is done -- the file does exist, and it is a proper XML file which conforms to
   # our XML Schema. It remains to test the things that cannot be checked just using a context-free grammar: That the
   # column specifications actually make sense for a table, and names are unambiguous.
@@ -67,8 +66,11 @@ checkFormatConformity <- function(filename) {
 #   4. That each column's levels are correctly specified:
 #       a)  A column with levelsType set to Municipalities contains only names of municipalities.
 #       b)  A column with levelsType set to NumericRange is numeric, and if an upper or lower bound is specified,
-#           then all values fall above (below) the lower (upper) bound.
-#       c)  A column with levelsType set to Character contains only elements as specified by one of the <level> tags.
+#           then all values fall above (below) the lower (upper) bound. Note that we do not require that every number
+#           inside the actual range occurs.
+#       c)  A column with levelsType set to Character contains only elements as specified by one of the <level> tags,
+#           and every level specified by a <level> tag actually occurs. Note the slight difference to our assumptions on
+#           a NumericRange column.
 #   5. That the valueColumn is numeric, possibly with NAs.
 
 checkDocumentationCorrectness <- function(filename) {
@@ -127,10 +129,72 @@ checkDocumentationCorrectness <- function(filename) {
 
   for (columnNumber in 1:(length(docColumns) - 1)) { # -1 because the final column is the valueColumn, which we've already checked.
     docColumn <- docColumns[[columnNumber]]
+    # What is the documented name of this column?:
+    docColumnName <- docColumn$colname[[1]][1]
     # Test that the column really exists:
-    test_that(paste("column",docColumn$colname[[1]][1],"documented by",fileShortName,"exists in actual data"),{
-      expect_true(docColumn$colname[[1]][1] %in% colnames(dataTable))
+    test_that(paste("column",docColumnName,"documented by",fileShortName,"exists in actual data"),{
+      expect_true(docColumnName %in% colnames(dataTable))
     })
+    if (!(docColumnName %in% colnames(dataTable))) {
+      next # If the column doesn't actually exist, we can't test that its levels are as described
+    }
+
+    # Now, let's proceed to check that the description of the levels is correct. There are three cases,
+    # depending on levelsType. (That it is one of the three was checked already by the XSD.)
+    docLevelsType <- docColumn$levels$levelsType[[1]][1]
+    if (docLevelsType == "Municipalities") {
+      # Here, we need to check that every level of the column is the name of a municipality:
+      test_that(paste("the column",docColumnName,"of",fileShortName,", documented to contain municipalities, does contain names of municipalities"),{
+        expect_true(all(dataTable[,docColumnName] %in% municipalityNames))
+      })
+    }
+
+    if (docLevelsType == "NumericRange") {
+      # First, we test that the column is in fact numeric:
+      test_that(paste("the column",docColumnName,"of",fileShortName,"is numeric in the table"),{
+        expect_true(is.numeric(dataTable[,docColumnName])) # expect_type doesn't work here since integers and floats are different types, but both give true here
+      })
+      # If a minLevel is specified, we test that there are no values below it:
+      if(!is.null(docColumn$levels$minLevel[[1]][1])) {
+        docColMinLevel <- as.numeric(docColumn$levels$minLevel[[1]][1])
+        test_that(paste("the column",docColumnName,"of",fileShortName,", documented to have minLevel",docColMinLevel,"takes no values below its minLevel"),{
+          expect_lte(docColMinLevel, min(dataTable[,docColumnName]))
+        })
+      }
+      # If a maxLevel is specified, we test that there are no values above it:
+      if(!is.null(docColumn$levels$maxLevel[[1]][1])) {
+        docColMaxLevel <- as.numeric(docColumn$levels$maxLevel[[1]][1])
+        test_that(paste("the column",docColumnName,"of",fileShortName,", documented to have maxLevel",docColMaxLevel,"takes no values above its maxLevel"),{
+          expect_gte(docColMaxLevel, max(dataTable[,docColumnName]))
+        })
+      }
+    }
+
+    if (docLevelsType == "Character") {
+      # If the type is specified to be Character, we need to look at the list of <level> objects, look at the <levelName> of each,
+      # and create a list of the values that occur. Then we test that this list contains exactly the same elements as the column in
+      # the data.
+      docLevelsList <- docColumn$levels
+      documentationLevels <- character(0)
+      for (levelIndex in 2:length(docLevelsList)) { # 2, because the first element is the <levelsType> tag.
+        # Store the name of the level in levelsSeen:
+        documentationLevels[levelIndex-1] <- docLevelsList[[levelIndex]]$levelName[[1]][1] # -1 because obviously documentationLevels should index from 1, not 2 (Got a bug from that before...)
+      }
+      # Having gathered our list of the levels the documentation says there are, we test two things:
+      #   1. Every level in the actual data also occurs in the documentation
+      #   2. Every level in the documentation actually occurs in the data
+      test_that(paste("Every level of column",docColumnName,"in the actual data also occurs in the documentation",fileShortName),{
+        # setdiff computes the set-minus operation A\B -- so setdiff(A,B) is all elements of A which do not also occur in B.
+        # So here we take the actually occurring values and remove the ones that are documented, and we expect to get the
+        # empty list, since we expect all occurring levels to be documented.
+        expect_equal(setdiff(dataTable[,docColumnName], documentationLevels), character(0))
+      })
+      test_that(paste("Every level of column",docColumnName,"documented in",fileShortName,"occurs in the actual data"), {
+        # Same logic as before, except we do B\A instead, since we want to check that every column the documentation says
+        # exists actually exists.
+        expect_equal(setdiff(documentationLevels, dataTable[,docColumnName]), character(0))
+      })
+    }
   }
 
   # We need a return value here, so that the code executing this function can itself be a test. Otherwise the testing
