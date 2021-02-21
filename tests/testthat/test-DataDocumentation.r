@@ -19,6 +19,9 @@ checkFormatConformity <- function(filename) {
   test_that(paste("file ",fileShortName," exists", sep=""),{
             expect_true(file.exists(filename))
             })
+  if(!file.exists(filename)) {
+    return(FALSE)
+  }
 
   # Then, let's check that it is valid XML:
   test_that(paste("file ",fileShortName," is properly formed XML"),{
@@ -57,7 +60,7 @@ checkFormatConformity <- function(filename) {
 # documentation file, using the function checkFormatConformity, and then (assuming the file it got can indeed be the
 # the documentation of a table) it checks that the documentation is correct.
 #
-# To do this, it checks in order:
+# To do this, it checks:
 #   1. That the file it claims to be documenting exists
 #   2. That the file it claims to be documenting is indeed a csv
 #   3. That the csv has exactly the columns the documentation claims it has
@@ -85,7 +88,7 @@ checkDocumentationCorrectness <- function(filename) {
 
   # The first thing to do is to find the csv file it says it documents and test that it exists:
   csvFilename <- docList$filename[[1]][1] # The [[1]][1] is for some reason how the list we get is structured?
-  test_that(paste("file ",csvFilename," which ",fileShortName," claims to document exists"),{
+  test_that(paste("file ",csvFilename," which ",fileShortName," claims to document exists",sep=""),{
     expect_true(file.exists(system.file("extdata",csvFilename, package="SCBHandlerPlotter")))
   })
   if (!file.exists(system.file("extdata",csvFilename, package="SCBHandlerPlotter"))) {
@@ -95,6 +98,20 @@ checkDocumentationCorrectness <- function(filename) {
   # If it does exist, we can read it in:
   dataTable <- read.csv(system.file("extdata",csvFilename, package="SCBHandlerPlotter"))
 
+  # Having read it in, we check the valueColumn specified exists and is numeric:
+  docValueColumn <- docList$columns$valueColumn$colname[[1]][1]
+  test_that(paste("the valueColumn of",fileShortName,"exists in the actual table"),{
+    expect_true(docValueColumn %in% colnames(dataTable))
+  })
+  if (!(docValueColumn %in% colnames(dataTable))) {
+    # If the valueColumn doesn't exist, we can't check that it is numeric, obviously. No need to stop the testing here, though,
+    # since nothing else depends on this test passing.
+  } else {
+    # If it does exist, we test that it is numeric:
+    test_that(paste("the valueColumn of",fileShortName,"is numeric in the table"),{
+      expect_true(is.numeric(dataTable[,docValueColumn])) # expect_type doesn't work here since integers and floats are different types, but both give true here
+    })
+  }
   # We need a return value here, so that the code executing this function can itself be a test. Otherwise the testing
   # will abort as soon as we get an error in here, and so not all XML files would get tested as soon as one fails. Thus:
   return(TRUE)
