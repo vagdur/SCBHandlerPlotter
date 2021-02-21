@@ -2,7 +2,7 @@
 
 <table>
     <name>LandUse</name>
-    <filename>SCB_alderkon.csv</filename>
+    <filename>SCB_markanvandning.csv</filename>
     <description>A table containing data on land use in each municipality.</description>
     <source>SCB</source>
     <year>2015</year>
