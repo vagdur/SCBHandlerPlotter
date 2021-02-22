@@ -101,9 +101,17 @@ checkFormatConformity <- function(filename) {
     currentLevelsType <- currentLevels$levelsType[[1]][1]
     # Different tests depending on the value of levelsType:
     if (currentLevelsType == "Municipalities") {
-
+      # In this case. there should be no further information at all than the levelsType:
+      test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> Municipalities, contains no further information on levels"),{
+        expect_equal(length(currentLevels),1) # Easiest way to check this is just that the number of tags is one
+      })
     } else if(currentLevelsType == "NumericRange") {
-
+      # In this case, there are two allowed extra tags (<minLevel> and <maxLevel>), so we count how many of them are present,
+      # and then check that the total number of tags is correct:
+      expectedNumberOfTags <- 1 + as.integer(!is.null(currentLevels$minLevel)) + as.integer(!is.null(currentLevels$maxLevel))
+      test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> NumericRange, contains no further information on levels other than possibly minRange and maxRange"),{
+        expect_equal(length(currentLevels),expectedNumberOfTags)
+      })
     } else if(currentLevelsType == "Character") {
 
     } else {
