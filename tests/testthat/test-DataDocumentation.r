@@ -45,10 +45,78 @@ checkFormatConformity <- function(filename) {
 
   # Now the easy part of our testing is done -- the file does exist, and it is a proper XML file which conforms to
   # our XML Schema. It remains to test the things that cannot be checked just using a context-free grammar: That the
-  # column specifications actually make sense for a table, and names are unambiguous.
+  # column specifications actually make sense for a table.
+  # Specifically, what we need to check is that:
+  #     a)  All columns levels specification are correct for their levelsType:
+  #           i) a column of levelsType "Municipalities" contains no additional information on levels
+  #           ii) a column of levelsType NumericRange contains at most information on upper and lower limits of the range
+  #           iii) a column of levelsType Character contains information on at least one level
+  #     b)  No two columns share an identifier or share an alias
+  #     c)  Within each column, its identifier and aliases are all distinct
+  #     d)  No two levels of one column share a name or share an alias
+  #     e)  Within each level of each column, its name and aliases are all distinct
+  # Points c) and e) strictly speaking probably wouldn't cause any errors if violated, but they're indicative that something
+  # has gone wrong, so we still enforce them just to prevent bugs from arising later.
 
-  # We need a return value here, so that the code executing this function can itself be a test. Otherwise the testing
-  # will abort as soon as we get an error in here, and so not all XML files would get tested as soon as one fails. Thus:
+  # The first thing we do is turn the parsed XML into a nested list, since that is easier to work with. Note that, thanks to
+  # the XML Schema validation, we know quite a bit about its structure already, so for example we can immediately jump into
+  # the <table></table> tags and then into the <columns></columns> tags, which is where we need to be working:
+  columnsList <- xml2::as_list(parsedXML)$table$columns
+
+  # The way to structure this is that we loop over all columns, and for each column we check a) and c)-e), and aggregate a
+  # list of names and aliases of all the columns. Then, once the loop is done, we check that this list does not contain any
+  # duplicate elements.
+  columnIdentifiersAndAliases <- character(0)
+  for (columnIndex in 1:(length(columnsList)-1)) { # -1 because the final element is the <valueColumn>, which was checked via XSD already.
+    currentColumn <- columnsList[[columnIndex]]
+    # The very first thing we can check is c), that this column has distinct identifier and aliases:
+    currentColumnIdAndAliases <- character(0)
+    # Append the identifier to our list of identifiers and aliases:
+    currentColumnIdAndAliases <- append(currentColumnIdAndAliases, currentColumn$identifier[[1]][1])
+    # We know that if there are no aliases, then we only have identifier, colname, and then levels. So conversely, if the total number
+    # of tags is greater than three, we know the third until the n-1th tag must be an alias:
+    if(length(currentColumn) > 3) {
+      for (tagIndex in 3:(length(currentColumn)-1)) {
+        currentColumnIdAndAliases <- append(currentColumnIdAndAliases, currentColumn[[tagIndex]][[1]][1])
+      }
+    }
+    # Having gathered this list, we test that it consists of distinct elements:
+    test_that(paste("identifier and aliases of column",currentColumn$identifier[[1]][1],"in",fileShortName,"are all distinct"),{
+      # Here, instead of just checking if length(unique(x))==length(x), we compute which if any elements are duplicates, so that
+      # the fail message actually tells you what the duplicates are:
+      duplicates <- unique(currentColumnIdAndAliases[duplicated(currentColumnIdAndAliases)])
+      expect_equal(duplicates,character(0))
+    })
+    # Note that we don't stop testing here if this fails, since the rest of our tests will still make sense.
+
+    # At this point, we actually append unique(currentColumnnIdAndAliases) to the total list of identifiers and aliases, not
+    # the list itself. The logic here is that if there is a duplicate inside this column, that will already have been caught
+    # by the test just above, so if we add the entire list, we just pollute the fail message of the test of condition b) --
+    # we want to be easily able to see failures of b) that occur because of clashes between different columns, and let clashes
+    # within a column be flagged by failures of c). So:
+    columnIdentifiersAndAliases <- append(columnIdentifiersAndAliases, unique(currentColumnIdAndAliases))
+
+    # Now, we can move into the levels tag to check first a) and then d) and e):
+    currentLevels <- currentColumn$levels
+    currentLevelsType <- currentLevels$levelsType[[1]][1]
+    # Different tests depending on the value of levelsType:
+    if (currentLevelsType == "Municipalities") {
+
+    } else if(currentLevelsType == "NumericRange") {
+
+    } else if(currentLevelsType == "Character") {
+
+    } else {
+      # Entering this case should be impossible, since the XML Schema says that levelsType has to have one of the three
+      # values "Municipalities", "NumericRange", or "Character". So if we enter this, then the XSD must have been changed
+      # without updating the tests:
+      stop("Something seems to have gone wrong with the XSD, or it has been updated without updating the tests.")
+    }
+  }
+
+  # If we didn't encounter any errors in execution, and didn't return FALSE at any earlier point, we now return TRUE to
+  # indicate the file passed all its tests and we can proceed to test if the documentation is true: (So far we only tested
+  # that it is of the right format.)
   return(TRUE)
 }
 
@@ -147,9 +215,7 @@ checkDocumentationCorrectness <- function(filename) {
       test_that(paste("the column",docColumnName,"of",fileShortName,", documented to contain municipalities, does contain names of municipalities"),{
         expect_true(all(dataTable[,docColumnName] %in% municipalityNames))
       })
-    }
-
-    if (docLevelsType == "NumericRange") {
+    } else if (docLevelsType == "NumericRange") {
       # First, we test that the column is in fact numeric:
       test_that(paste("the column",docColumnName,"of",fileShortName,"is numeric in the table"),{
         expect_true(is.numeric(dataTable[,docColumnName])) # expect_type doesn't work here since integers and floats are different types, but both give true here
@@ -168,9 +234,7 @@ checkDocumentationCorrectness <- function(filename) {
           expect_gte(docColMaxLevel, max(dataTable[,docColumnName]))
         })
       }
-    }
-
-    if (docLevelsType == "Character") {
+    } else if (docLevelsType == "Character") {
       # If the type is specified to be Character, we need to look at the list of <level> objects, look at the <levelName> of each,
       # and create a list of the values that occur. Then we test that this list contains exactly the same elements as the column in
       # the data.
@@ -194,6 +258,11 @@ checkDocumentationCorrectness <- function(filename) {
         # exists actually exists.
         expect_equal(setdiff(documentationLevels, dataTable[,docColumnName]), character(0))
       })
+    } else {
+      # Entering this case should be impossible, since the XML Schema says that levelsType has to have one of the three
+      # values "Municipalities", "NumericRange", or "Character". So if we enter this, then the XSD must have been changed
+      # without updating the tests:
+      stop("Something seems to have gone wrong with the XSD, or it has been updated without updating the tests.")
     }
   }
 
