@@ -113,7 +113,7 @@ checkFormatConformity <- function(filename) {
         expect_equal(length(currentLevels),expectedNumberOfTags)
       })
     } else if(currentLevelsType == "Character") {
-
+      # Here, we check d) and e)
     } else {
       # Entering this case should be impossible, since the XML Schema says that levelsType has to have one of the three
       # values "Municipalities", "NumericRange", or "Character". So if we enter this, then the XSD must have been changed
@@ -121,6 +121,15 @@ checkFormatConformity <- function(filename) {
       stop("Something seems to have gone wrong with the XSD, or it has been updated without updating the tests.")
     }
   }
+
+  # Having looped through all columns, we now have a list of the identifiers and aliases of all columns. So, finishing
+  # up, we test condition b), that this list of identifiers and aliases contains no duplicate elements:
+  test_that(paste("distinct columns in",fileShortName,"do not have identical identifiers or aliases"),{
+    # Here, instead of just checking if length(unique(x))==length(x), we compute which if any elements are duplicates, so that
+    # the fail message actually tells you what the duplicates are:
+    duplicates <- unique(columnIdentifiersAndAliases[duplicated(columnIdentifiersAndAliases)])
+    expect_equal(duplicates,character(0))
+  })
 
   # If we didn't encounter any errors in execution, and didn't return FALSE at any earlier point, we now return TRUE to
   # indicate the file passed all its tests and we can proceed to test if the documentation is true: (So far we only tested
