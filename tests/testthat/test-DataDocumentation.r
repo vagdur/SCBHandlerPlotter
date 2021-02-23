@@ -6,8 +6,8 @@
 #     a)  A column of levelsType "Municipalities" contains no additional information on levels, one of levelsType NumericRange contains
 #         at most information on upper and lower limits of the range, and one of levelsType Character contains information on at least
 #         one level.
-#     b)  No two columns share a name or share an alias.
-#     c)  No two levels of one column share a name or share an alias.
+#     b)  No two columns share a name or share an alias. (And no single column has the same alias listed twice, or an alias equal to the identifier)
+#     c)  No two levels of one column share a name or share an alias. (And no single level has an alias equal to the levelName or a duplicate alias)
 # Note that this not at all check that the documentation is *correct* -- the file it claims to be documenting might not even exist,
 # and these tests would still not fail. It only checks that the file *could* be the documentation of a table.
 # All this is divided into one actual test each, so that eventual errors can be granularly identified.
@@ -113,7 +113,43 @@ checkFormatConformity <- function(filename) {
         expect_equal(length(currentLevels),expectedNumberOfTags)
       })
     } else if(currentLevelsType == "Character") {
-      # Here, we check d) and e)
+      # Here, we check d) and e), that is, that different levels have different identifiers and aliases, and also within
+      # levels there are no duplicate aliases/identifiers. First, however, we check that there is no attempt to specify
+      # maxLevek or minLevel:
+      test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> Character, does not have a minLevel specified"),{
+        expect_true(is.null(currentLevels$minLevel))
+      })
+      test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> Character, does not have a maxLevel specified"),{
+        expect_true(is.null(currentLevels$maxLevel))
+      })
+      # We actually need to break testing here if this fails, since our later tests will assume a Character column contains
+      # first its <levelsType> and then one or more <level> tags, and nothing else. This assumption causes some unclear error if we let a file
+      # which violates it through -- thus, better to break testing here than to output hard-to-understand errors later.
+      if (!is.null(currentLevels$maxLevel)|!is.null(currentLevels$minLevel)) {
+        return(FALSE)
+      }
+
+      # Having verified this, we know that all the remaining tags after <levelsType> are <level> tags. So we loop through them precisely
+      # like we looped through the columns, aggregating a list of ids and aliases that appear:
+      levelIdsAndAliases <- character(0)
+      for (levelIndex in 2:length(currentLevels)) {
+        currentLevel <- currentLevels[[levelIndex]]
+        # Since a <level> tag only contains the levelName and its aliases, and we don't distinguish between these, we can
+        # just do a sapply to extract them all:
+        currentLevelIdAndAliases <- sapply(currentLevel, function(x) x[[1]][1])
+        # Now we test that this list contains no duplicates:
+        test_that(paste("level",currentLevelIdAndAliases[1],"of column",currentColumn$identifier[[1]][1],"in",fileShortName,"contains no duplicate aliases or alias duplicating the levelName"),{
+          duplicates <- unique(currentLevelIdAndAliases[duplicated(currentLevelIdAndAliases)])
+          expect_equal(duplicates,character(0))
+        })
+        # By the same logic as for the column ids and aliases, we append the unique ones from this level to the list for all levels:
+        levelIdsAndAliases <- append(levelIdsAndAliases, unique(currentLevelIdAndAliases))
+      }
+      # And now we can test that no two different levels of the same column share a name or share an alias:
+      test_that(paste("no two distinct levels of column",currentColumn$identifier[[1]][1],"in",fileShortName,"share a name or an alias"),{
+        duplicates <- unique(levelIdsAndAliases[duplicated(levelIdsAndAliases)])
+        expect_equal(duplicates,character(0))
+      })
     } else {
       # Entering this case should be impossible, since the XML Schema says that levelsType has to have one of the three
       # values "Municipalities", "NumericRange", or "Character". So if we enter this, then the XSD must have been changed
@@ -299,9 +335,10 @@ extdataLocation <- system.file("extdata", package = "SCBHandlerPlotter")
 tablesToCheck <- list.files(extdataLocation, pattern="*\\.xml$")
 # Then we just loop over all the files and run our tests on each of them:
 for (tableToCheck in tablesToCheck) {
+  filename <- paste(extdataLocation,"/",tableToCheck,sep="")
   # We wrap this in a test so that the loop won't stop just because one file fails its tests.
   # If this test fails, there'll also be more granular tests that have failed:
   test_that(paste("documentation ",tableToCheck," is correct"),{
-    expect_true(checkDocumentationCorrectness(paste(extdataLocation,"/",tableToCheck,sep="")))
+    expect_true(checkDocumentationCorrectness(filename))
   })
 }
