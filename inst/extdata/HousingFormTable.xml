@@ -3,6 +3,7 @@
 <table>
     <name>HousingForm</name>
     <filename>SCB_boendeform.csv</filename>
+    <title>Housing form</title>
     <description>A table containing data on how many households of a certain form (e.g. single male above 64, woman with child) live in a certain type of housing (e.g. condo, owned house).</description>
     <source>SCB</source>
     <year>2019</year>

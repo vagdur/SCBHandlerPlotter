@@ -3,6 +3,7 @@
 <table>
     <name>MaritalStatus</name>
     <filename>SCB_civilstand.csv</filename>
+    <title>Marital status</title>
     <description>A table containing data on marital status, divided by age, gender, and municipality.</description>
     <source>SCB</source>
     <year>2019</year>

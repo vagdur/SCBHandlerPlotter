@@ -3,6 +3,7 @@
 <table>
     <name>EducationLevel</name>
     <filename>SCB_utbildningsniva.csv</filename>
+    <title>Level of education</title>
     <description>A table containing data on level of education, divided by age category and gender.</description>
     <source>SCB</source>
     <year>2019</year>

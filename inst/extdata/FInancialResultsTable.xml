@@ -3,6 +3,7 @@
 <table>
     <name>MunicipalIncomeStatements</name>
     <filename>SCB_resultatrakning.csv</filename>
+    <title>Incomes of municipal governments</title>
     <description>A table containing data on total tax income, and equalisation and subsidies, per municipality.</description>
     <source>SCB</source>
     <year>2019</year>

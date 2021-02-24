@@ -3,6 +3,7 @@
 <table>
     <name>AgeGender</name>
     <filename>SCB_alderkon.csv</filename>
+    <title>Ages and genders</title>
     <description>A table containing data on population, divided by age, gender, and municipality.</description>
     <source>SCB</source>
     <year>2019</year>

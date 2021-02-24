@@ -3,6 +3,7 @@
 <table>
     <name>Incomes</name>
     <filename>SCB_inkomster.csv</filename>
+    <title>Incomes of individuals</title>
     <description>A table containing data on mean and median income, divided by gender and some age categories.</description>
     <source>SCB</source>
     <year>2018</year>

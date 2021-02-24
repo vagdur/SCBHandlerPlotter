@@ -3,6 +3,7 @@
 <table>
     <name>TaxRates</name>
     <filename>SCB_kommunal_och_regionalskatt.csv</filename>
+    <title>Tax rates</title>
     <description>A table containing data on municipal and regional tax rates.</description>
     <source>SCB</source>
     <year>2019</year>

@@ -3,6 +3,7 @@
 <table>
     <name>LandUse</name>
     <filename>SCB_markanvandning.csv</filename>
+    <title>Use of land</title>
     <description>A table containing data on land use in each municipality.</description>
     <source>SCB</source>
     <year>2015</year>

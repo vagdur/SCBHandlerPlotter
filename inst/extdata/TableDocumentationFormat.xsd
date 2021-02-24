@@ -4,6 +4,7 @@
     <xs:element name = 'table'><xs:complexType><xs:sequence>
         <xs:element name = 'name' type='xs:token' />
         <xs:element name = 'filename' type='xs:token' />
+        <xs:element name = 'title' type='xs:token' />
         <xs:element name = 'description' type='xs:string' />
         <xs:element name = 'source' type='xs:token' />
         <xs:element name = 'year' type='xs:gYear' />

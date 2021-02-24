@@ -3,6 +3,7 @@
 <table>
     <name>HouseholdSize</name>
     <filename>SCB_hushallsstorlek.csv</filename>
+    <title>Household size</title>
     <description>A table containing data on how many households of each given size there are in a municipality.</description>
     <source>SCB</source>
     <year>2019</year>

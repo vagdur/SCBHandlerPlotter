@@ -3,6 +3,7 @@
 <table>
     <name>BirthRegion</name>
     <filename>SCB_inrikesvsutrikesfodda.csv</filename>
+    <title>Region of birth</title>
     <description>A table containing data on country of birth (Sweden or not Sweden), divided by age and gender.</description>
     <source>SCB</source>
     <year>2019</year>
