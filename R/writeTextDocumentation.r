@@ -1,10 +1,15 @@
+# In order to create all the data table documentation, set working directory to the project folder, and run:
+# writeAllTextDocumentation("./inst/extdata","./man")
+
+
+
 # This file contains a script that takes an XML documentation file of a table
 # and produces a documentation file in the .Rd format, to make it more human
 # readable. Note that this function won't be run ever by the package --
 # instead it should be getting run just before build time for the package,
-# to create the .Rd files to go with the package.
-# Still a bit uncertain about where to store this file, actually, and how
-# to set it up to run at the right time.
+# to create the .Rd files to go with the package. Unfortunately there is no
+# hook to do this at buildtime for an R package, so it just has to be done
+# manually... It's unfortunate.
 
 # We create this as a function which reads in the filename of the XML documentation,
 # and returns the documentation as one big string. This is to make it slightly easier
@@ -105,4 +110,29 @@ writeTextDocumentation <- function(filename) {
 
   # Having created all the documentation, we now just return the string:
   return(doc)
+}
+
+
+# This function takes as argument the folder where the XML documentation is stored and the folder where the .Rd documentation should be stored.
+# It then runs writeTextDocumentation on each XML file in sourceFolder, and writes the result to targetFolder as an .Rd file.
+writeAllTextDocumentation <- function(sourceFolder, targetFolder) {
+  # Find all the XML files:
+  xmlFilesInSourceFolder <- list.files(sourceFolder, pattern="*\\.xml$")
+  # We also need these with .Rd as their file extension, since we need to save them:
+  filenamesWithRdExtension <- gsub("\\.xml","\\.Rd",xmlFilesInSourceFolder)
+  # Now we loop over the files and print each of them to the target folder:
+  for (fileIndex in c(1:length(xmlFilesInSourceFolder))) {
+    targetFilePath <- paste(targetFolder,"/",filenamesWithRdExtension[fileIndex],sep="")
+    sourceFilePath <- paste(sourceFolder,"/",xmlFilesInSourceFolder[fileIndex],sep="")
+    # Just to be safe, if the .Rd file already exists, we remove it:
+    if (file.exists(targetFilePath)) {
+      file.remove(targetFilePath)
+    }
+    # Open a connection to the file we want to write to:
+    fileConn <- file(description = targetFilePath, encoding="UTF8")
+    writeLines(writeTextDocumentation(sourceFilePath),
+        con = fileConn)
+    # Close the connection again:
+    close(fileConn)
+  }
 }
