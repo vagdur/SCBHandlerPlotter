@@ -1,6 +1,8 @@
 # In order to create all the data table documentation, set working directory to the project folder, and run:
 # writeAllTextDocumentation("./inst/extdata","./man")
 
+# TODO: Add functionality to automatically remove old documentation that no longer has a corresponding XML file.
+
 
 
 # This file contains a script that takes an XML documentation file of a table
