@@ -5,3 +5,5 @@
 #' @import ggiraph
 # ggplot2 provides the general plotting that'll be made interactive by ggiraph:
 #' @import ggplot2
+# methods provides OOP functionality:
+#' @import methods
