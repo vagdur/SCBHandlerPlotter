@@ -15,4 +15,4 @@ A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinno
 A column of factor data. Its levels are: Född i Sverige (a.k.a.: Sverige, Born in Sweden, Sweden.), Utrikes född (a.k.a.: Inte Sverige, Born outside Sweden, Not Sweden.).}
 }}
 \description{A table containing data on country of birth (Sweden or not Sweden), divided by age and gender.}
-\keywords{datasets}
+\keyword{datasets}

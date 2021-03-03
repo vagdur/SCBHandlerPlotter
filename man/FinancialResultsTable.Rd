@@ -11,4 +11,4 @@ Municipality the observation is from.}
 A column of factor data. Its levels are: skatteintäkter (a.k.a.: Skatteintäkter, Tax income.), generella statsbidrag och utjämning (a.k.a.: SubsidiesAndEqualisation.).}
 }}
 \description{A table containing data on total tax income, and equalisation and subsidies, per municipality.}
-\keywords{datasets}
+\keyword{datasets}

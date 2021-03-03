@@ -15,4 +15,4 @@ A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinno
 A column of factor data. Its levels are: ogifta (a.k.a.: Unmarried, Never married, Ogifta, Aldrig gifta.), gifta (a.k.a.: Married, Gifta.), skilda (a.k.a.: Divorced, Skilda.), änkor/änklingar (a.k.a.: WidowErs, Änk(or/lingar), Spouse deceased.).}
 }}
 \description{A table containing data on marital status, divided by age, gender, and municipality.}
-\keywords{datasets}
+\keyword{datasets}

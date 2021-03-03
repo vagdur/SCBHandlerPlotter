@@ -108,7 +108,7 @@ writeTextDocumentation <- function(filename) {
   # The final thing we need to add is the description and keyword 'datasets': (Things don't appear in this order when rendered, but this is
   # the order Roxygen would put them, so we follow their ordering.)
   tableDescription <- docList$description[[1]][1]
-  doc <- paste(doc, '\\description{',tableDescription,'}\n\\keywords{datasets}',sep="")
+  doc <- paste(doc, '\\description{',tableDescription,'}\n\\keyword{datasets}',sep="")
 
   # Having created all the documentation, we now just return the string:
   return(doc)
@@ -136,5 +136,6 @@ writeAllTextDocumentation <- function(sourceFolder, targetFolder) {
         con = fileConn)
     # Close the connection again:
     close(fileConn)
+    message(paste("Wrote documentation based on",xmlFilesInSourceFolder[fileIndex]))
   }
 }

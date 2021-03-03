@@ -15,4 +15,4 @@ A column of factor data. Its levels are: Kommunal (a.k.a.: Municipal.), Enskild 
 A column of factor data. Its levels are: Gymnasiebehöriga (a.k.a.: True, Behöriga, Eligible.), Gymnasieobehöriga (a.k.a.: False, Obehöriga, Ineligible.).}
 }}
 \description{A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private).}
-\keywords{datasets}
+\keyword{datasets}

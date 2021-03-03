@@ -15,4 +15,4 @@ A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinno
 A column of factor data. Its levels are: eftergymnasial utbildning, 3 år eller mer (a.k.a.: Tertiary education, 3+ years.), eftergymnasial utbildning, mindre än 3 år (a.k.a.: Tertiary education, less than 3 years.), forskarutbildning (a.k.a.: Postgraduate education.), förgymnasial utbildning kortare än 9 år (a.k.a.: Primary education, less than 9 years.), förgymnasial utbildning, 9 (10) år (a.k.a.: Primary education, 9 (10) years.), gymnasial utbildning, 3 år (a.k.a.: Secondary education, 3 years.), gymnasial utbildning, högst 2 år (a.k.a.: Secondary education, at most 2 years.), uppgift om utbildningsnivå saknas (a.k.a.: No information, Uppgift saknas.).}
 }}
 \description{A table containing data on level of education, divided by age category and gender.}
-\keywords{datasets}
+\keyword{datasets}
