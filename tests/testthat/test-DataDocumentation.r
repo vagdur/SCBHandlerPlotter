@@ -49,7 +49,8 @@ checkFormatConformity <- function(filename) {
   # Specifically, what we need to check is that:
   #     a)  All columns levels specification are correct for their levelsType:
   #           i) a column of levelsType "Municipalities" contains no additional information on levels
-  #           ii) a column of levelsType NumericRange contains at most information on upper and lower limits of the range
+  #           ii) a column of levelsType NumericRange contains at most information on upper and lower limits of the range,
+  #               and does not have a maxLevel less than its minLevel
   #           iii) a column of levelsType Character contains information on at least one level
   #     b)  No two columns share an identifier or share an alias
   #     c)  Within each column, its identifier and aliases are all distinct
@@ -112,6 +113,14 @@ checkFormatConformity <- function(filename) {
       test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> NumericRange, contains no further information on levels other than possibly minRange and maxRange"),{
         expect_equal(length(currentLevels),expectedNumberOfTags)
       })
+      # We also need to check that, if maxLevel and minLevel are both set, the minLevel is not greater than the maxLevel:
+      if (!is.null(currentLevels$minLevel) && !is.null(currentLevels$maxLevel)) {
+        test_that(paste("column",currentColumn$identifier[[1]][1],"in",fileShortName,", documented to have <levelsType> NumericRange, does not have minLevel>maxLevel"),{
+          currentColumnMinLevel <- as.integer(currentLevels$minLevel[[1]][1])
+          currentColumnMaxLevel <- as.integer(currentLevels$maxLevel[[1]][1])
+          expect_lte(currentColumnMinLevel, currentColumnMaxLevel)
+        })
+      }
     } else if(currentLevelsType == "Character") {
       # Here, we check d) and e), that is, that different levels have different identifiers and aliases, and also within
       # levels there are no duplicate aliases/identifiers. First, however, we check that there is no attempt to specify
