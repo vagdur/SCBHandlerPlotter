@@ -1,12 +1,12 @@
 ################################################################################
 # Tests of the Level class:
 test_that("Level objects can be created manually", {
-  tl <- new("Level", lvName = "Test", aliases = c("test","tset"))
+  tl <- new("Level", name = "Test", aliases = c("test","tset"))
   expect_s4_class(tl, "Level")
 })
 test_that("Level objects can be created by constructor", {
   tl <- Level("Test", c("Test","test","tset"))
-  tl2 <- Level(lvName = "Test", aliases = c("Test","test","tset"))
+  tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
   expect_s4_class(tl, "Level")
   expect_s4_class(tl2, "Level")
 })
