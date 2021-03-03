@@ -30,19 +30,22 @@ setGeneric("aliases", function(x) standardGeneric("aliases"))
 setGeneric("aliases<-", function(x,value) standardGeneric("aliases<-"))
 setGeneric("dealias", function(x, toDealias) standardGeneric("dealias"))
 
-# So, to begin with, the Level class. We set it:
+##########################################################################################
+# Definition of the Level class
+
+# Create the class:
 setClass("Level",
          slots = c(
-           lvName = "character",
+           name = "character",
            aliases = "character"
          ),
          prototype = c(
-           lvName = NA_character_,
+           name = NA_character_,
            aliases = NA_character_
          ))
 # Define a constructor: (A very simple thing indeed.)
-Level <- function(lvName, aliases=character(0)) {
-  new("Level", lvName = lvName, aliases = aliases)
+Level <- function(name, aliases=character(0)) {
+  new("Level", name = name, aliases = aliases)
 }
 # Define a validator:
 setValidity("Level", function(object) {
@@ -50,14 +53,14 @@ setValidity("Level", function(object) {
   # as an entry in a csv file, but that is much more complicated, so we "test" that by throwing an error
   # at some later point if the csv handling breaks or something. The easiest way to test if a value will
   # work is to try to use it and see what happens, after all.
-  if (length(object@lvName) != 1) {
+  if (length(object@name) != 1) {
     return("Name of level should be a single string, not a vector")
   }
 })
 # Define setter and getter for name and aliases:
-setMethod("name", "Level", function(x) x@lvName)
+setMethod("name", "Level", function(x) x@name)
 setMethod("name<-", "Level", function(x,value) {
-  x@lvName <- value
+  x@name <- value
   validObject(x)
   x
 })
@@ -74,10 +77,10 @@ setMethod("aliases<-","Level", function(x, value) {
 setMethod("dealias","Level", function(x, toDealias) {
   # Not the prettiest code ever, but it does precisely what was described:
   return(unname(unlist(sapply(toDealias, function(str) {
-    if (str == x@lvName) {
-      x@lvName
+    if (str == x@name) {
+      x@name
     } else if (str %in% x@aliases) {
-      x@lvName
+      x@name
     } else {
       NULL
     }
