@@ -250,16 +250,15 @@ setMethod("levelDealias", "Column", function(x, toDealias) {
   return(unname(unlist(sapply(toDealias, function(str) {
     # We actually want to do slightly different things depending on the levelsType here.
     # If it is of type Municipality, we return str if str is a municipality name, otherwise NULL:
-    if (x@levelsType == "Municipality") {
+    if (x@levelsType == "Municipalities") {
       if (str %in% municipalityNames) {
         str
       } else {
         NULL
       }
-    }
-    # If it is of type NumericRange, we return NULL if str is not a number. If it is a number, and maxLevel
-    # or minLevel is set, we check if str is in the right range. If it is, we return it, otherwise NULL.
-    if (x@levelsType == "NumericRange") {
+    } else if (x@levelsType == "NumericRange") {
+      # If it is of type NumericRange, we return NULL if str is not a number. If it is a number, and maxLevel
+      # or minLevel is set, we check if str is in the right range. If it is, we return it, otherwise NULL.
       if (!is.numeric(str)) {
         NULL
       } else {
@@ -271,11 +270,11 @@ setMethod("levelDealias", "Column", function(x, toDealias) {
           str
         }
       }
-    }
-    # If it is of type Character, we try to dealias str against every level, and check that this succeeds either
-    # zero times (in which case we return NULL) or once (in which case we return the successful value). If it succeeds
-    # more than once, we throw an error, since there is no unambiguous thing to dealias to.
-    if (x@levelsType == "Character") {
+    } else if (x@levelsType == "Character") {
+      # If it is of type Character, we try to dealias str against every level, and check that this succeeds either
+      # zero times (in which case we return NULL) or once (in which case we return the successful value). If it succeeds
+      # more than once, we throw an error, since there is no unambiguous thing to dealias to.
+
       dealiasingResults <- unname(unlist(sapply(x@colLevels, function(lev) {
         dealias(lev, str)
       })))
@@ -296,6 +295,9 @@ setMethod("levelDealias", "Column", function(x, toDealias) {
         # to be alerted if our assumptions that this is unreachable are violated:
         stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
       }
+    } else {
+      # This should be impossible -- levelsType has to be one of those three values
+      stop("Column has invalid levelsType.")
     }
   }))))
 })

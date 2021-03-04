@@ -118,13 +118,60 @@ test_that("Setters and getters of Column object slots works", {
   expect_identical(maxLevel(tc2),23)
   maxLevel(tc2) <- 56
   expect_identical(maxLevel(tc2), 56)
+  expect_error(maxLevel(tc2) <- "Not a number")
 
   expect_true(is.na(minLevel(tc2)))
   minLevel(tc2) <- 12
   expect_identical(minLevel(tc2), 12)
+  expect_error(minLevel(tc2) <- "Not a number")
 
   expect_identical(colLevels(tc3), list(tl, tl2))
   colLevels(tc3) <- list(tl)
   expect_identical(colLevels(tc3), list(tl))
   expect_error(colLevels(tc3) <- list(1,2,3))
+})
+
+test_that("Dealiasing of columns works", {
+  tl <- Level("Test", c("Test","test","tset"))
+  tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
+  tc <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
+  expect_identical(dealias(tc, "Tests"),"Tests")
+  expect_identical(dealias(tc, c("test","testa","Tests","Not one of the aliases")),c("Tests","Tests","Tests"))
+  expect_true(is.null(dealias(tc,"Not one of the aliases")))
+})
+
+test_that("levelDealias works for columns", {
+  # Here, we need to test all three cases of levelType separately.
+
+  # First the NumericRange case:
+  tc_num1 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=23, minLevel=12)
+  tc_num2 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange")
+  # For 22, which falls between minLevel and maxLevel for tc_num1, levelDealias should just return its input for
+  # both columns. But for 11 and 25, which fall outside the range, it should be NULL for tc_num1 but the input
+  # for tc_num2.
+  expect_identical(levelDealias(tc_num1, 22),22)
+  expect_identical(levelDealias(tc_num2, 22),22)
+  expect_identical(levelDealias(tc_num1, c(12:23)), c(12:23))
+  expect_identical(levelDealias(tc_num2, c(12:23)), c(12:23))
+  expect_true(is.null(levelDealias(tc_num1,11)))
+  expect_identical(levelDealias(tc_num2, 11),11)
+  expect_true(is.null(levelDealias(tc_num1,25)))
+  expect_identical(levelDealias(tc_num2, 25),25)
+
+  # Now the Municipalities case:
+  # It should return its input back if that input was the name of a Swedish municipality, otherwise it
+  # should return NULL. So it succeeds on Uppsala but fails on Copenhagen.
+  tc_mun <- Column(name="region", levelsType = "Municipalities")
+  expect_identical(levelDealias(tc_mun,"Uppsala"),"Uppsala")
+  expect_identical(levelDealias(tc_mun, c("Stockholm","Uppsala","Oslo")), c("Stockholm", "Uppsala"))
+  expect_true(is.null(levelDealias(tc_mun, "Copenhagen")))
+
+  # Finally, the Character case:
+  # This is really the main case where we need this.
+  tl1 <- Level(name = "Test1", aliases = c("test1","test_1","tset1"))
+  tl2 <- Level(name = "Test2", aliases = c("test2","test_2","tset2"))
+  tc_char <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
+  expect_identical(levelDealias(tc_char, "test_1"), "Test1")
+  expect_true(is.null(levelDealias(tc_char, "Not an alias in the levels")))
+  expect_identical(levelDealias(tc_char, c("test1","tset2","Not in the data","Test1","Test2")), c("Test1","Test2","Test1","Test2"))
 })
