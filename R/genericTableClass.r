@@ -276,10 +276,26 @@ setMethod("levelDealias", "Column", function(x, toDealias) {
     # zero times (in which case we return NULL) or once (in which case we return the successful value). If it succeeds
     # more than once, we throw an error, since there is no unambiguous thing to dealias to.
     if (x@levelsType == "Character") {
-      dealiasingResults <- unname(unlist(sapply(x@levels, function(lev) {
+      dealiasingResults <- unname(unlist(sapply(x@colLevels, function(lev) {
         dealias(lev, str)
       })))
-    }}}} # Intentional syntax error to remember where to start tomorrow morning! :D
+      if (is.null(dealiasingResults)) {
+        # So none of the levels could dealias it, so we return NULL:
+        NULL
+      } else if (length(dealiasingResults) == 1) {
+        # WARNING: For some reason, if we return dealiasingResults, it pops out as an n x 1 matrix, but inside the actual function,
+        # it is as expected just a vector. This is very surprising, but borne out by inserting a browser() right after the sapply.
+        # I wonder why R does that to the return value?
+        dealiasingResults[1]
+      } else if (length(dealiasingResults) > 1) {
+        # More than one level succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
+        # that has been tested, this is impossible. We throw an error.
+        stop("More than one level succeeded in dealiasing. Are you sure your column has been constructed correctly?")
+      } else {
+        # This really should not be possible. Since there should be no way to reach this point, we throw an error here
+        # to be alerted if our assumptions that this is unreachable are violated:
+        stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
+      }
     }
   }))))
 })
