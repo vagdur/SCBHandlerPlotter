@@ -329,7 +329,7 @@ setClass("DocumentedTable",
            name = "character",
            description = "character",
            dataSource = "character",
-           dataYear = "integer",
+           dataYear = "numeric",
            csvData = "data.frame",
            tableColumns = "list",
            valueColumn = "character"
@@ -338,7 +338,7 @@ setClass("DocumentedTable",
            name = NA_character_,
            description = NA_character_,
            dataSource = NA_character_,
-           dataYear = NA_integer_,
+           dataYear = NA_real_,
            csvData = data.frame(),
            tableColumns = list(),
            valueColumn = NA_character_
@@ -347,7 +347,7 @@ setClass("DocumentedTable",
 DocumentedTable <- function(name = NA_character_,
                             description = NA_character_,
                             dataSource = NA_character_,
-                            dataYear = NA_integer_,
+                            dataYear = NA_real_,
                             csvData = data.frame(),
                             tableColumns = list(),
                             valueColumn = NA_character_) {
@@ -407,7 +407,7 @@ setMethod("name<-", "DocumentedTable", function(x, value) {
 
 setGeneric("description", function(x) standardGeneric("description"))
 setGeneric("description<-", function(x, value) standardGeneric("description<-"))
-setMethod("description","DocumentedTable", function(x) x$description)
+setMethod("description","DocumentedTable", function(x) x@description)
 setMethod("description<-","DocumentedTable", function(x, value) {
   x@description <- value
   validObject(x)
@@ -416,7 +416,7 @@ setMethod("description<-","DocumentedTable", function(x, value) {
 
 setGeneric("dataSource", function(x) standardGeneric("dataSource"))
 setGeneric("dataSource<-", function(x, value) standardGeneric("dataSource<-"))
-setMethod("dataSource","DocumentedTable", function(x) x$dataSource)
+setMethod("dataSource","DocumentedTable", function(x) x@dataSource)
 setMethod("dataSource<-","DocumentedTable", function(x, value) {
   x@dataSource <- value
   validObject(x)
@@ -425,7 +425,7 @@ setMethod("dataSource<-","DocumentedTable", function(x, value) {
 
 setGeneric("dataYear", function(x) standardGeneric("dataYear"))
 setGeneric("dataYear<-", function(x, value) standardGeneric("dataYear<-"))
-setMethod("dataYear","DocumentedTable", function(x) x$dataYear)
+setMethod("dataYear","DocumentedTable", function(x) x@dataYear)
 setMethod("dataYear<-","DocumentedTable", function(x, value) {
   x@dataYear <- value
   validObject(x)
@@ -434,7 +434,7 @@ setMethod("dataYear<-","DocumentedTable", function(x, value) {
 
 setGeneric("csvData", function(x) standardGeneric("csvData"))
 setGeneric("csvData<-", function(x, value) standardGeneric("csvData<-"))
-setMethod("csvData","DocumentedTable", function(x) x$csvData)
+setMethod("csvData","DocumentedTable", function(x) x@csvData)
 setMethod("csvData<-","DocumentedTable", function(x, value) {
   x@csvData <- value
   validObject(x)
@@ -443,7 +443,7 @@ setMethod("csvData<-","DocumentedTable", function(x, value) {
 
 setGeneric("tableColumns", function(x) standardGeneric("tableColumns"))
 setGeneric("tableColumns<-", function(x, value) standardGeneric("tableColumns<-"))
-setMethod("tableColumns","DocumentedTable", function(x) x$tableColumns)
+setMethod("tableColumns","DocumentedTable", function(x) x@tableColumns)
 setMethod("tableColumns<-","DocumentedTable", function(x, value) {
   x@tableColumns <- value
   validObject(x)
@@ -452,7 +452,7 @@ setMethod("tableColumns<-","DocumentedTable", function(x, value) {
 
 setGeneric("valueColumn", function(x) standardGeneric("valueColumn"))
 setGeneric("valueColumn<-", function(x, value) standardGeneric("valueColumn<-"))
-setMethod("valueColumn","DocumentedTable", function(x) x$valueColumn)
+setMethod("valueColumn","DocumentedTable", function(x) x@valueColumn)
 setMethod("valueColumn<-","DocumentedTable", function(x, value) {
   x@valueColumn <- value
   validObject(x)
@@ -544,8 +544,13 @@ setMethod("canHandleQuery", "DocumentedTable", function(x, ...) {
 })
 
 # Define query:
-setGeneric("query", function(x, verbose, checkHandleable, failIfUnable, ...) standardGeneric("query"))
+setGeneric("query", function(x, verbose=NA, checkHandleable=NA, failIfUnable=NA, ...) standardGeneric("query"))
 setMethod("query", "DocumentedTable", function(x, verbose=FALSE, checkHandleable=TRUE, failIfUnable=FALSE, ...) {
+  #TODO: Make verbose more useful. Right now it only messages if the query matches no results, but it would make
+  # sense for it to also warn if one of multiple specified values did not match anything. (I.e. if we run query(a=c("b","c"))
+  # and find some posts with "b" but none with "c", that might be something we want to print a message about?)
+
+
   # First, we check if we can even handle the query, in the case where checkHandleable is TRUE:
   if (checkHandleable) {
     if (!canHandleQuery(x, ...)) {
@@ -590,6 +595,12 @@ setMethod("query", "DocumentedTable", function(x, verbose=FALSE, checkHandleable
   }
 
   # So now we have the subset that filtered down to. This is the easiest step: We just sum over
-  # the valueColumn in this subset and return that number:
+  # the valueColumn in this subset and return that number. If verbose=TRUE, we also check if the
+  # query actually matched any entries, and post a message if it did not.
+  if (verbose) {
+    if (nrow(runningSubset) == 0) {
+      message("The query, while possible, did not match any rows in the data.")
+    }
+  }
   return(sum(runningSubset[,x@valueColumn]))
 })
