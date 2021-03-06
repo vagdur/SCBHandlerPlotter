@@ -15,3 +15,7 @@ for (tableToCheck in tablesToCheck) {
   loadedTable <- createDocumentedTableFromXML(filename)
   allLoadedTables[[length(allLoadedTables) + 1]] <- loadedTable
 }
+
+# Finally, it is convenient to have a vector of the names of tables, to speed up queries with forceTable set,
+# since otherwise each such query would have to loop through the list of tables anew:
+loadedTableNames <- unlist(lapply(allLoadedTables, name))

@@ -596,10 +596,14 @@ setMethod("query", "DocumentedTable", function(x, verbose=FALSE, checkHandleable
 
   # So now we have the subset that filtered down to. This is the easiest step: We just sum over
   # the valueColumn in this subset and return that number. If verbose=TRUE, we also check if the
-  # query actually matched any entries, and post a message if it did not.
+  # query actually matched any entries, and post a message if it did not. Additionally we check if
+  # the query matched some rows that have valueColumn set to NA, and if so message about that.
   if (verbose) {
     if (nrow(runningSubset) == 0) {
       message("The query, while possible, did not match any rows in the data.")
+    }
+    if (any(is.na(runningSubset[,x@valueColumn]))) {
+      message(paste("The query, while possible, matched",sum(is.na(runningSubset[,x@valueColumn])),"rows whose value were NA, so the sum over all matching rows is NA."))
     }
   }
   return(sum(runningSubset[,x@valueColumn]))
