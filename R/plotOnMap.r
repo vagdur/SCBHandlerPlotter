@@ -1,17 +1,8 @@
-#' Fill out partial municipality data with NAs
-#'
-#' This function takes a data frame consisting of one column of municipality names and one column of data for each municipality,
-#' and adds a row for each municipality that is not present, with NA in the data column. It also strips out any row which does
-#' not have the name of a municipality in the first column.
-#'
-#' @param dat Data frame of partial data on municipalities
-#'
-#' @examples
-#' fillOutMapPlotFrame(data.frame(
-#'        municipality = c("Stockholm", "Lund", "Uppsala"),
-#'        students = c(23000, 32000, 33500)
-#'        ))
-#' @return A data frame with one row for each municipality
+# This function takes a data frame consisting of one column of municipality names and one column of data for each municipality,
+# and adds a row for each municipality that is not present, with NA in the data column. It also strips out any row which does
+# not have the name of a municipality in the first column. It is called by plotOnMap on all of its inputs, so it doesn't really
+# need to be exported for use by package users -- the only usecase is to make plotting easier, but now that is not necessary.
+# (This function was previously exported.)
 
 fillOutMapPlotFrame <- function(dat) {
   allMunicipalities <- levels(swe_kommuner_allpoints$knnamn)
