@@ -120,11 +120,12 @@ plot_on_map <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legen
 #' @export
 
 example_forest_plot <- function() {
-  prcSkogsbruk <- sapply(levels(SCBdata$markanvandning$region), function(mun) {
+  prcSkogsbruk <- sapply(municipalityNames, function(mun) {
     100 * SCB(Municipality = mun, LandUseClass = c("skogsmark, produktiv", "skogsmark, improduktiv")) / SCB(Municipality = mun, TotalArea = TRUE)
   })
-  ttip <- paste(levels(SCBdata$markanvandning$region), ": ", round(prcSkogsbruk, 1), "%", sep = "")
-  tooltips <- data.frame(knnamn = levels(SCBdata$markanvandning$region), ttip = ttip)
+  ttip <- paste(municipalityNames, ": ", round(prcSkogsbruk, 1), "%", sep = "")
+  tooltips <- data.frame(knnamn = municipalityNames, ttip = ttip)
   prcSkogsbrukFrame <- data.frame(Municipality = names(prcSkogsbruk), PlotVar = prcSkogsbruk)
-  return(plot_on_map(prcSkogsbrukFrame, tooltips = tooltips, mainTitle = "Procent av Sveriges kommuners yta som är skog", subTitle = "Data från SCB", legendTitle = "Pct."))
+  # We need to Unicode escape the åäö here, because CRAN gets unhappy if non-ASCII characters are included in code, even if it is just a hardcoded string:
+  return(plot_on_map(prcSkogsbrukFrame, tooltips = tooltips, mainTitle = "Procent av Sveriges kommuners yta som \u00E4r skog", subTitle = "Data fr\u00E5n SCB", legendTitle = "Pct."))
 }
