@@ -9,34 +9,93 @@
 # It probably isn't, but it would cleanly solve the issue of validating input here.
 
 createDocumentedTableFromXML <- function(pathToXML) {
-  #TODO: Implement this. The below is just to return something of the right type, so we can write tests:
-  tcol_num <- Column(name = "numeric_column",
-                     aliases = c("numericColumn", "NumericColumn", "numeric.column"),
-                     levelsType = "NumericRange",
-                     maxLevel = 10,
-                     minLevel = 0)
-  tcol_municip <- Column(name = "municipalities_column",
-                         aliases = c("municipalitiesColumn", "MunicipalitiesColumn", "municipalities.column"),
-                         levelsType = "Municipalities")
-  tlev_1 <- Level(name = "test_level_1",
-                  aliases = c("testLevel1", "TestLevel1", "test.level.1"))
-  tlev_2 <- Level(name = "test_level_2",
-                  aliases = c("testLevel2", "TestLevel2", "test.level.2"))
-  tlev_3 <- Level(name = "test_level_3",
-                  aliases = c("testLevel3", "TestLevel3", "test.level.3"))
-  tcol_char <- Column(name = "character_column",
-                      aliases = c("characterColumn","CharacterColumn","character.column"),
-                      colLevels = list(tlev_1,tlev_2,tlev_3),
-                      levelsType = "Character")
-  tdt <- DocumentedTable(name = "TestTable",
-                         description = "Description",
-                         dataSource = "dataSource",
-                         dataYear = 1111, # Wikipedia knows of almost nothing that happened this year. Synod of Rath Breasail, anyone?
-                         csvData = data.frame(numeric_column = c(1,2,3,3,2),
-                                              municipalities_column = c("Uppsala","Stockholm","Lund","Skara","Uppsala"),
-                                              character_column = c("test_level_1","test_level_2","test_level_1","test_level_2","test_level_2"),
-                                              valueColumn=c(100, 10, 1, 0.1, 0.01)),
-                         tableColumns = list(tcol_num, tcol_municip, tcol_char),
-                         valueColumn = "valueColumn")
-  return(tdt)
+  # As step zero, we load the XML file into a variable, and immediately transform it
+  # into a list, which is easier to work with in R. We also immediately look into the
+  # main tag, <table>, 'cause that's where all the data is.
+
+  xmlList <- xml2::as_list(xml2::read_xml(pathToXML, encoding="UTF8"))$table
+
+  # Then, we read in the general properties of the table, i.e. name, description, etc:
+  tableName <- xmlList$name[[1]][1]
+  tableDescription <- xmlList$description[[1]][1]
+  tableDataSource <- xmlList$source[[1]][1]
+  tableDataYear <- as.integer(xmlList$year[[1]][1])
+
+  # We also read in the valueColumn specified by the XML, though that hides a few tags down:
+  tableValueColumn <- xmlList$columns$valueColumn$colname[[1]][1]
+
+  # Next, we load the CSV data:
+  csvDataFilename <- xmlList$filename[[1]][1]
+  tableCsvData <- read.csv(paste(dirname(pathToXML),"/",csvDataFilename, sep=""), fileEncoding = "UTF8")
+
+  # Now, it is time to start constructing the Column objects based on what the XML tells us:
+  tableCols <- list()
+  xmlListCols <- xmlList$columns
+  for (xmlListColIndex in 1:(length(xmlListCols)-1)) { # The -1 because the final item is the <valueColumn> tag which we already handled
+    xmlListColumn <- xmlListCols[[xmlListColIndex]]
+    curColName <- xmlListColumn$colname[[1]][1]
+    # The aliases of the column are split across one <identifier> tag and one or more <alias> tags -- this makes sense for writing the
+    # documentation in a human-readable format, but is a little bit annoying to us. So we first load the <identifier> tag's contents into
+    # our list of aliases, and then check if there are any <alias> tags, and if so, we load them:
+    curColAliases <- xmlListColumn$identifier[[1]][1]
+    if (length(xmlListColumn) > 3) { # There's always <identifier>, <colname>, and <levels> -- any additional tags are <alias>
+      # A sapply here gets us out of having to loop again:
+      curColAliasTagContents <- sapply(c(3:(length(xmlListColumn)-1)), function(tagIndex) xmlListColumn[[tagIndex]][[1]][1])
+      curColAliases <- c(curColAliases, curColAliasTagContents)
+    }
+
+    # Now that we have the aliases, we figure out the levelsType, and depending on what it is load the additional data we needed:
+    curColLevels <- xmlListColumn$levels
+    curColLevelsType <- curColLevels$levelsType[[1]][1]
+    if (curColLevelsType == "Municipalities") {
+      # In this case, we actually have all the information we need already, and can just create the Column object:
+      currentColumnObject <- Column(name = curColName, aliases = curColAliases, levelsType = curColLevelsType)
+    } else if (curColLevelsType == "NumericRange") {
+      # In this case, the only complication that can occur is that a maxLevel or minLevel is specified. We begin by
+      # creating the column without those, and then set them if necessary:
+      currentColumnObject <- Column(name = curColName, aliases = curColAliases, levelsType = curColLevelsType)
+      if (!is.null(curColLevels$minLevel)) {
+        minLevel(currentColumnObject) <- as.double(curColLevels$minLevel[[1]][1])
+      }
+      if (!is.null(curColLevels$maxLevel)) {
+        maxLevel(currentColumnObject) <- as.double(curColLevels$maxLevel[[1]][1])
+      }
+    } else if (curColLevelsType == "Character") {
+      # In this case, we need to do some work: We need to read off what the permitted levels of this column are,
+      # and then create a Level object for each, before we can create the Column object.
+      curColLevelObjects <- list()
+      for (xmlLevelDescriptionIndex in 2:(length(curColLevels))) { # The 2 because the first tag is the <levelsType> tag.
+        xmlLevelDescription <- curColLevels[[xmlLevelDescriptionIndex]]
+        # Start by finding the name of the level:
+        curLevelName <- xmlLevelDescription$levelName[[1]][1]
+        # If it has any aliases, we extract all of them with a sapply:
+        if (length(xmlLevelDescription) > 1) {
+          curLevelAliases <- sapply(c(2:length(xmlLevelDescription)), function(aliasIndex) xmlLevelDescription[[aliasIndex]][[1]][1])
+        } else {
+          # It has no aliases, so it should just be an empty vector:
+          curLevelAliases <- character(0)
+        }
+        # We create the level object and append it to the list of levels:
+        curLevelObject <- Level(name = curLevelName, aliases = curLevelAliases)
+        curColLevelObjects[[length(curColLevelObjects) + 1]] <- curLevelObject
+      }
+      # Having created Level objects for each level, we can now create the Column object:
+      currentColumnObject <- Column(name = curColName, aliases = curColAliases, levelsType = curColLevelsType, colLevels = curColLevelObjects)
+    } else {
+      # All columns must have one of these three level types, so the XML is invalid and we stop:
+      stop("XML file attempted to specify an invalid levelsType. This violates the XSD for XML documentation -- make sure you validate your XML files.")
+    }
+    # Having constructed our Column object, we append it onto the list of Column objects:
+    tableCols[[length(tableCols) + 1]] <- currentColumnObject
+  }
+
+  # Now we have one Column object per column documented in the XML, so we can finally create our DocumentedTable object and return it:
+  resultingTable <- DocumentedTable(name = tableName,
+                                    description = tableDescription,
+                                    dataSource = tableDataSource,
+                                    dataYear = tableDataYear,
+                                    csvData = tableCsvData,
+                                    tableColumns = tableCols,
+                                    valueColumn = tableValueColumn)
+  return(resultingTable)
 }
