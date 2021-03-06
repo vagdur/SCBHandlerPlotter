@@ -16,8 +16,6 @@ for (tableToCheck in tablesToCheck) {
 # Having verified that it doesn't completely break on any file in the folder, let's
 # also run it on some specific files we know are there, using snapshot tests so we
 # are alerted if the documentation ever changes unexpectedly:
-extdataLocation <- system.file("extdata", package = "SCBHandlerPlotter")
-
 test_that("running writeTextDocumentation on AgeGenderTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/AgeGenderTable.xml",sep="")))})
 test_that("running writeTextDocumentation on BirthCountryTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/BirthCountryTable.xml",sep="")))})
 test_that("running writeTextDocumentation on EducationLevelTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/EducationLevelTable.xml",sep="")))})
