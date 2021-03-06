@@ -7,13 +7,13 @@
 #' @param dat Data frame of partial data on municipalities
 #'
 #' @examples
-#' fill_out_mapplotframe(data.frame(
+#' fillOutMapPlotFrame(data.frame(
 #'        municipality = c("Stockholm", "Lund", "Uppsala"),
 #'        students = c(23000, 32000, 33500)
 #'        ))
 #' @return A data frame with one row for each municipality
 
-fill_out_mapplotframe <- function(dat) {
+fillOutMapPlotFrame <- function(dat) {
   allMunicipalities <- levels(swe_kommuner_allpoints$knnamn)
 
   present_muns <- unique(dat[, 1])
@@ -45,19 +45,19 @@ fill_out_mapplotframe <- function(dat) {
 #' library(ggiraph)
 #' exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"),
 #'                           students = c("some", "many", "loads"))
-#' girafe(ggobj = plot_on_map(exampledata))
+#' girafe(ggobj = plotOnMap(exampledata))
 #' @returns A ggplot object that can be turned into an interactive graphic with the girafe function, see the example.
 #'
 #' @export
 
-plot_on_map <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendTitle = "") {
+plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendTitle = "") {
   if (is.null(ncol(dat))) {
     if (!is.null(names(dat))) {
       muns <- names(dat)
       dat <- data.frame(muns, dat)
     }
   }
-  dat <- fill_out_mapplotframe(dat)
+  dat <- fillOutMapPlotFrame(dat)
   colnames(dat) <- c("knnamn", "PlotVar")
   plotData <- dplyr::left_join(swe_kommuner_allpoints, dat, by = "knnamn")
   if (identical(NA, tooltips)) {
@@ -116,10 +116,10 @@ plot_on_map <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legen
 #' @examples
 #' library(ggplot2)
 #' library(ggiraph)
-#' girafe(ggobj = example_forest_plot())
+#' girafe(ggobj = exampleForestPlot())
 #' @export
 
-example_forest_plot <- function() {
+exampleForestPlot <- function() {
   prcSkogsbruk <- sapply(municipalityNames, function(mun) {
     100 * SCB(Municipality = mun, LandUseClass = c("skogsmark, produktiv", "skogsmark, improduktiv")) / SCB(Municipality = mun, TotalArea = TRUE)
   })
@@ -127,5 +127,5 @@ example_forest_plot <- function() {
   tooltips <- data.frame(knnamn = municipalityNames, ttip = ttip)
   prcSkogsbrukFrame <- data.frame(Municipality = names(prcSkogsbruk), PlotVar = prcSkogsbruk)
   # We need to Unicode escape the åäö here, because CRAN gets unhappy if non-ASCII characters are included in code, even if it is just a hardcoded string:
-  return(plot_on_map(prcSkogsbrukFrame, tooltips = tooltips, mainTitle = "Procent av Sveriges kommuners yta som \u00E4r skog", subTitle = "Data fr\u00E5n SCB", legendTitle = "Pct."))
+  return(plotOnMap(prcSkogsbrukFrame, tooltips = tooltips, mainTitle = "Procent av Sveriges kommuners yta som \u00E4r skog", subTitle = "Data fr\u00E5n SCB", legendTitle = "Pct."))
 }
