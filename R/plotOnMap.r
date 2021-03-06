@@ -24,7 +24,7 @@ fillOutMapPlotFrame <- function(dat) {
 #'
 #' @param dat Either a data frame of two columns, the first of which contains names of municipalities and the second
 #' the data, or a named list, where the names are names of municipalities. Allowed to be partial data,
-#' municipalities without data are set to NA.
+#' municipalities without data have their data automatically set to NA.
 #' @param tooltips A data frame with two columns, the first of which contains the name of a municipality and the second
 #' the tooltip that should be shown for that municipality. If omitted, tooltips are generated automatically from the data.
 #' @param mainTitle Main title of the plot, displayed at the top. If omitted, plot has no title.
@@ -112,7 +112,7 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
 
 exampleForestPlot <- function() {
   prcSkogsbruk <- sapply(municipalityNames, function(mun) {
-    100 * SCB(Municipality = mun, LandUseClass = c("skogsmark, produktiv", "skogsmark, improduktiv")) / SCB(Municipality = mun, TotalArea = TRUE)
+    100 * SCB(Municipality = mun, LandUseType = c("skogsmark, produktiv", "skogsmark, improduktiv")) / SCB(Municipality = mun, LandUseType = "Total area")
   })
   ttip <- paste(municipalityNames, ": ", round(prcSkogsbruk, 1), "%", sep = "")
   tooltips <- data.frame(knnamn = municipalityNames, ttip = ttip)
