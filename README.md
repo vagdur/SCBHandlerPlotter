@@ -1,5 +1,6 @@
 <!-- badges: start -->
   [![Codecov test coverage](https://codecov.io/gh/vagdur/SCBHandlerPlotter/branch/main/graph/badge.svg)](https://codecov.io/gh/vagdur/SCBHandlerPlotter?branch=main)
+  [![Build Status](https://travis-ci.com/vagdur/SCBHandlerPlotter.svg?branch=main)](https://travis-ci.com/vagdur/SCBHandlerPlotter)
 <!-- badges: end -->
 
 # SCBHandlerPlotter
