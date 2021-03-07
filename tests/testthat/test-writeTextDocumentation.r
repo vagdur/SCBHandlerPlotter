@@ -16,14 +16,47 @@ for (tableToCheck in tablesToCheck) {
 # Having verified that it doesn't completely break on any file in the folder, let's
 # also run it on some specific files we know are there, using snapshot tests so we
 # are alerted if the documentation ever changes unexpectedly:
-test_that("running writeTextDocumentation on AgeGenderTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/AgeGenderTable.xml",sep="")))})
-test_that("running writeTextDocumentation on BirthCountryTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/BirthCountryTable.xml",sep="")))})
-test_that("running writeTextDocumentation on EducationLevelTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/EducationLevelTable.xml",sep="")))})
-test_that("running writeTextDocumentation on FinancialResultsTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/FinancialResultsTable.xml",sep="")))})
-test_that("running writeTextDocumentation on HighSchoolEligibilityTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HighSchoolEligibilityTable.xml",sep="")))})
-test_that("running writeTextDocumentation on HouseholdSizeTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HouseholdSizeTable.xml",sep="")))})
-test_that("running writeTextDocumentation on HousingFormTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HousingFormTable.xml",sep="")))})
-test_that("running writeTextDocumentation on IncomeTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/IncomeTable.xml",sep="")))})
-test_that("running writeTextDocumentation on LandUseTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/LandUseTable.xml",sep="")))})
-test_that("running writeTextDocumentation on MaritalStatusTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/MaritalStatusTable.xml",sep="")))})
-test_that("running writeTextDocumentation on TaxRatesTable.xml returns the same output as last time",{expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/TaxRatesTable.xml",sep="")))})
+test_that("running writeTextDocumentation on AgeGenderTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/AgeGenderTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on BirthCountryTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/BirthCountryTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on EducationLevelTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/EducationLevelTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on FinancialResultsTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/FinancialResultsTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on HighSchoolEligibilityTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HighSchoolEligibilityTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on HouseholdSizeTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HouseholdSizeTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on HousingFormTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/HousingFormTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on IncomeTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/IncomeTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on LandUseTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/LandUseTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on MaritalStatusTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/MaritalStatusTable.xml",sep="")))
+  })
+test_that("running writeTextDocumentation on TaxRatesTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(writeTextDocumentation(paste(extdataLocation,"/TaxRatesTable.xml",sep="")))
+  })
