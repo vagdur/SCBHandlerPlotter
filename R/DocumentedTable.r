@@ -182,7 +182,7 @@ setMethod("aliases<-","Column", function(x, value) {
 
 setGeneric("levelsType", function(x) standardGeneric("levelsType"))
 setGeneric("levelsType<-", function(x, value) standardGeneric("levelsType<-"))
-setMethod("levelsType","Column", function(x) x$levelsType)
+setMethod("levelsType","Column", function(x) x@levelsType)
 setMethod("levelsType<-","Column", function(x, value) {
   x@levelsType <- value
   validObject(x)

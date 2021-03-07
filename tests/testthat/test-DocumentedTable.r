@@ -106,14 +106,24 @@ test_that("Setters and getters of Column object slots works", {
   tc1 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange")
   tc2 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=23)
 
-  tl <- Level("Test", c("Test","test","tset"))
+  tl1 <- Level("Test", c("Test","test","tset"))
   tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
-  tc3 <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
+  tc3 <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
 
   expect_identical(name(tc1),"alder")
   name(tc1) <- "NewName"
   expect_identical(name(tc1),"NewName")
   expect_error(name(tc1) <- c("Two", "Names"))
+
+  expect_identical(aliases(tc1), c("Age","age"))
+  aliases(tc1) <- c("New","Aliases")
+  expect_identical(aliases(tc1),c("New","Aliases"))
+  expect_error(aliases(tc1) <- c(1,2,3))
+
+  expect_identical(levelsType(tc1), "NumericRange")
+  levelsType(tc1) <- "Municipalities"
+  expect_identical(levelsType(tc1), "Municipalities")
+  expect_error(levelsType(tc1) <- "An invalid levelsType")
 
   expect_identical(maxLevel(tc2),23)
   maxLevel(tc2) <- 56
@@ -125,9 +135,9 @@ test_that("Setters and getters of Column object slots works", {
   expect_identical(minLevel(tc2), 12)
   expect_error(minLevel(tc2) <- "Not a number")
 
-  expect_identical(colLevels(tc3), list(tl, tl2))
-  colLevels(tc3) <- list(tl)
-  expect_identical(colLevels(tc3), list(tl))
+  expect_identical(colLevels(tc3), list(tl1, tl2))
+  colLevels(tc3) <- list(tl1)
+  expect_identical(colLevels(tc3), list(tl1))
   expect_error(colLevels(tc3) <- list(1,2,3))
 })
 
