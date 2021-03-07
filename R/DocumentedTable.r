@@ -23,6 +23,10 @@
 # csv table, or NULL if it is not present. This seems to be the most elegant way
 # of handling the possibility of many different names for the same thing.
 
+# Throughout we will be using all the 'methods'-package functions to create our
+# S4 classes, so instead of writing methods:: every time, we just import it:
+#' @import methods
+
 # We start by defining the generics we will want in several classes:
 setGeneric("name", function(x) standardGeneric("name"))
 setGeneric("name<-", function(x, value) standardGeneric("name<-"))
