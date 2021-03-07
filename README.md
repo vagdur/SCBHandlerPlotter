@@ -1,3 +1,7 @@
+<!-- badges: start -->
+  [![Codecov test coverage](https://codecov.io/gh/vagdur/SCBHandlerPlotter/branch/main/graph/badge.svg)](https://codecov.io/gh/vagdur/SCBHandlerPlotter?branch=main)
+<!-- badges: end -->
+
 # SCBHandlerPlotter
 An R library for handling statistical tables from SCB, and creating interactive map plots based on them.
 

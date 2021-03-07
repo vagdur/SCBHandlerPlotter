@@ -22,5 +22,6 @@ Depends:
     ggiraph (>= 0.7.8),
     ggplot2 (>= 3.3.2)
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    covr
 Config/testthat/edition: 3
