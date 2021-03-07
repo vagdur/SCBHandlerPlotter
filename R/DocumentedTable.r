@@ -23,6 +23,10 @@
 # csv table, or NULL if it is not present. This seems to be the most elegant way
 # of handling the possibility of many different names for the same thing.
 
+# Throughout we will be using all the 'methods'-package functions to create our
+# S4 classes, so instead of writing methods:: every time, we just import it:
+#' @import methods
+
 # We start by defining the generics we will want in several classes:
 setGeneric("name", function(x) standardGeneric("name"))
 setGeneric("name<-", function(x, value) standardGeneric("name<-"))
@@ -156,7 +160,12 @@ setValidity("Column", function(object) {
     # Next, we check that each object in colLevels really is a level, and is furthermore
     # a valid object of that class:
     for (level in object@colLevels) {
-      if (!is(level)=="Level") {
+      if (!("Level" %in% is(level))) {
+        #NOTE: !("Level" %in% is(level)) permits objects that inherit from Level. The opposite order,
+        # !(is(level)=="Level") is a subtle bug -- as soon as "level" is an object of more than one class,
+        # e.g. a vector of numbers, this condition actually becomes a vector checking if each class "level" is
+        # is "Level". So this causes an unexpected warning, the same as you get if(c(TRUE,FALSE)).
+        # This was a major headache to figure out, so be careful if changing it.
         return("List of colLevels should consist of Level objects")
       }
       validObject(level)
@@ -377,7 +386,10 @@ setValidity("DocumentedTable", function(object) {
   # There are however a few checks needed on the remaining slots. We begin by checking that tableColumns is
   # indeed a list of valid Column objects, and the name of each occurs as a
   for (tableColumn in object@tableColumns) {
-    if(!is(tableColumn) == "Column") {
+    if(!("Column" %in% is(tableColumn))) {
+      # NOTE: This permits objects which inherit from Column. Note that "is(tableColumn)=="Column"" does not check
+      # for exactly the class Column, but is rather a bug. Cf. the note in the validity function of the Column class
+      # about this same issue.
       return("One of the elements of tableColumns is not a Column object.")
     }
     validObject(tableColumn)

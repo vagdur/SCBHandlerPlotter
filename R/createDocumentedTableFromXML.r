@@ -26,7 +26,7 @@ createDocumentedTableFromXML <- function(pathToXML) {
 
   # Next, we load the CSV data:
   csvDataFilename <- xmlList$filename[[1]][1]
-  tableCsvData <- read.csv(paste(dirname(pathToXML),"/",csvDataFilename, sep=""), fileEncoding = "UTF8")
+  tableCsvData <- utils::read.csv(paste(dirname(pathToXML),"/",csvDataFilename, sep=""), fileEncoding = "UTF8")
 
   # Now, it is time to start constructing the Column objects based on what the XML tells us:
   tableCols <- list()

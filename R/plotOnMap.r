@@ -1,3 +1,12 @@
+# There are two libraries we need to import for this code to work (we could write ggplot2:: one hundred times instead,
+# but this is cleaner), and for some reason a package in Depends: in DESCRIPTION is not added to NAMESPACE by roxygen,
+# so here we go:
+# ggiraph provides the interactive plot element:
+#' @import ggiraph
+# ggplot2 provides the general plotting that'll be made interactive by ggiraph:
+#' @import ggplot2
+
+
 # This function takes a data frame consisting of one column of municipality names and one column of data for each municipality,
 # and adds a row for each municipality that is not present, with NA in the data column. It also strips out any row which does
 # not have the name of a municipality in the first column. It is called by plotOnMap on all of its inputs, so it doesn't really
@@ -68,10 +77,10 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
   #  plotData$ttip[is.na(plotData$PlotVar)] <- NA
   # }
 
-  p <- ggplot(plotData, aes(ggplot_long, ggplot_lat)) +
+  p <- ggplot(plotData, aes(.data$ggplot_long, .data$ggplot_lat)) +
     geom_polygon_interactive(aes(
-      fill = PlotVar, group = knkod,
-      tooltip = ttip, data_id = knkod
+      fill = .data$PlotVar, group = .data$knkod,
+      tooltip = .data$ttip, data_id = .data$knkod
     )) +
     coord_equal() +
     theme(

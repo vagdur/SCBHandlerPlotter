@@ -28,15 +28,48 @@ for (tableToCheck in tablesToCheck) {
 # Having verified that it doesn't completely break on any file in the folder, let's
 # also run it on some specific files we know are there, using snapshot tests so we
 # are alerted if the documentation ever changes unexpectedly:
-test_that("running createDocumentedTableFromXML on AgeGenderTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/AgeGenderTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on BirthCountryTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/BirthCountryTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on EducationLevelTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/EducationLevelTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on FinancialResultsTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/FinancialResultsTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on HighSchoolEligibilityTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HighSchoolEligibilityTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on HouseholdSizeTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HouseholdSizeTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on HousingFormTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HousingFormTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on IncomeTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/IncomeTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on LandUseTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/LandUseTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on MaritalStatusTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/MaritalStatusTable.xml",sep="")), style="serialize")})
-test_that("running createDocumentedTableFromXML on TaxRatesTable.xml returns the same output as last time",{expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/TaxRatesTable.xml",sep="")), style="serialize")})
+test_that("running createDocumentedTableFromXML on AgeGenderTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/AgeGenderTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on BirthCountryTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/BirthCountryTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on EducationLevelTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/EducationLevelTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on FinancialResultsTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/FinancialResultsTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on HighSchoolEligibilityTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HighSchoolEligibilityTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on HouseholdSizeTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HouseholdSizeTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on HousingFormTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/HousingFormTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on IncomeTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/IncomeTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on LandUseTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/LandUseTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on MaritalStatusTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/MaritalStatusTable.xml",sep="")), style="serialize")
+  })
+test_that("running createDocumentedTableFromXML on TaxRatesTable.xml returns the same output as last time", {
+  skip_on_ci()
+  expect_snapshot_value(createDocumentedTableFromXML(paste(extdataLocation,"/TaxRatesTable.xml",sep="")), style="serialize")
+  })
 

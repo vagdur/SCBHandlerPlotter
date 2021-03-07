@@ -228,7 +228,7 @@ checkDocumentationCorrectness <- function(filename) {
     return(FALSE)
   }
   # If it does exist, we can read it in:
-  dataTable <- read.csv(system.file("extdata",csvFilename, package="SCBHandlerPlotter"), fileEncoding = "UTF-8")
+  dataTable <- utils::read.csv(system.file("extdata",csvFilename, package="SCBHandlerPlotter"), fileEncoding = "UTF-8")
 
   # Having read it in, we check the valueColumn specified exists and is numeric:
   docValueColumn <- docList$columns$valueColumn$colname[[1]][1]
