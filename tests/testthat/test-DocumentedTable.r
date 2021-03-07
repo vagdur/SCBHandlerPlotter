@@ -185,6 +185,14 @@ test_that("levelDealias works for columns", {
   expect_true(is.null(levelDealias(tc_char, "Not an alias in the levels")))
   expect_identical(levelDealias(tc_char, c("test1","tset2","Not in the data","Test1","Test2")),
                                          c("Test1","Test2","Test1","Test2"))
+  # If one column has more than one level succeed in dealiasing, we expect an error -- it means the alias isn't unambiguous.
+  tl3 <- Level(name = "Test3", aliases = c("test3","test_3","tset2")) # note "tset2" instead of "tset3" here -- so an alias reoccurs in several levels.
+  tc_char_ambiguous <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2,tl3))
+  expect_error(levelDealias(tc_char_ambiguous, "tset2"))
+
+  # We also make sure that a column whose levelsType is invalid (so the object itself is invalid) always fails in dealiasing levels:
+  tc_char@levelsType <- "An invalid levelsType"
+  expect_error(levelDealias(tc_char, "test1"))
 })
 
 ##########################################################################################################################################################
@@ -312,6 +320,14 @@ test_that("DocumentedTable validation works", {
 
 # Having tested that validation works, we now test that the setters and getters do what is expected:
 test_that("Setters and getters of DocumentedTable work", {
+  # For each slot of the class, we test three things:
+  # 1.  Its getter returns its value,
+  # 1.  if we use its setter to set a new value, that is the value the slot has,
+  # 2.  we get an error if we try to set it to something invalid. (Note that we don't need a large assortment
+  #     of invalid things to try to set it to -- what we're checking is that validObject is called, so we just need
+  #     one invalid value. Testing of the validity function itself is in a different test.)
+
+  # The first few things are very simple, just primitives that take certain values:
   expect_identical(name(tdt),"TestTable")
   name(tdt)<-"A new name"
   expect_identical(tdt@name, "A new name")
@@ -332,6 +348,34 @@ test_that("Setters and getters of DocumentedTable work", {
   expect_identical(tdt@dataYear, 1066)
   expect_error(name(tdt) <- c(1456, 1865))
 
+  # In order to test the setter and getter of csvData, we obviously need to define our data frames, both
+  # the one it currently contains and the one we want to change it to:
+  currentCsvData <- data.frame(numeric_column = c(1,2,3),
+                               municipalities_column = c("Uppsala","Stockholm","Lund"),
+                               character_column = c("test_level_1","test_level_2","test_level_1"),
+                               valueColumn=c(100,10,1))
+  newCsvData <- data.frame(numeric_column = c(1,2,3,4),
+                           municipalities_column = c("Uppsala","Stockholm","Lund","Lomma"),
+                           character_column = c("test_level_1","test_level_2","test_level_1","test_level_2"),
+                           valueColumn=c(100,10,1,0.1))
+  expect_equal(csvData(tdt), currentCsvData)
+  csvData(tdt) <- newCsvData
+  expect_equal(csvData(tdt),newCsvData)
+  expect_error(csvData(tdt) <- data.frame()) # An empty data frame lacks the valueColumn, so this is invalid and should give an error.
+  csvData(tdt) <- currentCsvData
+
+  # We also test getting and setting of tableColumns. Note that setting additional columns that are not present in the csvData should
+  # cause an error, but it is permissible to have columns in the csvData that do not match columns in the tableColumns --all documented columns
+  # must exist, but not all columns must be documented. (Though they do need to be documented to be queried...)
+  expect_equal(tableColumns(tdt), list(tcol_num, tcol_municip, tcol_char))
+  tableColumns(tdt) <- list(tcol_num, tcol_municip) # Removing one column from documentation should work...
+  expect_equal(tableColumns(tdt), list(tcol_num, tcol_municip))
+  expect_error(tableColumns(tdt) <- list(1,2,3))
+  tableColumns(tdt) <- list(tcol_num, tcol_municip, tcol_char)
+
+
+  # Setters and getters of valueColumn are strange, since it always needs to be a column in the csvData. Perhaps there should only be a
+  # getter, not a setter? We test anyway, expecting errors:
   expect_identical(valueColumn(tdt),"valueColumn")
   expect_error(valueColumn(tdt)<-"A new name") # The value column is checked against the csvData, so changing it should always give an error
                                                # unless the csvData has been manually changed.
@@ -341,6 +385,7 @@ test_that("Setters and getters of DocumentedTable work", {
 
 # Next up, we test the columnDealias method:
 test_that("columnDealias works", {
+  # First we test a few things against the correctly formatted table:
   expect_identical(columnDealias(tdt, "MunicipalitiesColumn"), "municipalities_column")
   expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "municipalities_column")),
                    c("municipalities_column", "municipalities_column"))
@@ -349,6 +394,10 @@ test_that("columnDealias works", {
   expect_null(columnDealias(tdt, "another_column_name"))
   expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "misplaced_column_name", "municipalities_column")),
                    c("municipalities_column", "municipalities_column"))
+  # Then, we make sure that if two columns share an alias, we get an error trying to dealias that alias:
+  aliases(tdt@tableColumns[[1]]) <- c("numericColumn", "NumericColumn", "numeric.column","municipalities_column")
+  expect_error(columnDealias(tdt,"municipalities_column"))
+  aliases(tdt@tableColumns[[1]]) <- c("numericColumn", "NumericColumn", "numeric.column")
 })
 
 # Now comes the time to test the interesting stuff: The canHandleQuery and query methods.
@@ -488,6 +537,13 @@ test_that("canHandleQuery and query work", {
   expect_message(query(tdt, numeric_column = 3, MunicipalitiesColumn = "Uppsala", verbose=TRUE))
   expect_silent(query(tdt, numeric_column = 3, MunicipalitiesColumn = "Uppsala", verbose=FALSE))
 
+  # If the query matches some row where the valueColumn is NA, we want a message about this if
+  # verbose is TRUE, otherwise not:
+  tdt@csvData$valueColumn[5] <- NA # Was originally 0.01
+  expect_message(query(tdt, MunicipalitiesColumn = "Uppsala", verbose=TRUE))
+  expect_silent(query(tdt, MunicipalitiesColumn = "Uppsala", verbose=FALSE))
+  tdt@csvData$valueColumn[5] <- 0.01
+
   # Having checked that a lot of queries it should be able to handle are indeed reported as possible to handle
   # and give the correct result, let us check that it correctly reports itself unable to handle queries it
   # should not be able to handle:
@@ -511,4 +567,14 @@ test_that("canHandleQuery and query work", {
   #   ...if we supply it with several parameters and even just one of them is wrong:
   expect_false(canHandleQuery(tdt, municipalityColumn="Lomma", characterColumn = "Not a real level"))
   expect_false(canHandleQuery(tdt, characterColumn="test_level_1", numericColumn = -10000))
+
+  # Finally, we need to check that checkHandleable and failIfUnable parameters behave as expected.
+  # If checkHandleable is false, and we supply an unhandleable query (which should never happen -- that
+  # parameter should only be FALSE if handleability has already been checked), we expect errors to happen:
+  expect_error(query(tdt, NotARealColumn = "Not a real level", checkHandleable = FALSE))
+
+  # If checkHandleable is TRUE and we supply an unhandleable query, what happens should depend on the value of
+  # failIfUnable: If it is TRUE, we expect an error, otherwise, we expect a warning and NA.
+  expect_error(query(tdt, NotARealColumn = "Not a real level", checkHandleable = TRUE, failIfUnable = TRUE))
+  expect_warning(expect_equal(query(tdt, NotARealColumn = "Not a real level", checkHandleable = TRUE, failIfUnable = FALSE), NA_real_))
 })
