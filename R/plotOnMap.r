@@ -77,10 +77,10 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
   #  plotData$ttip[is.na(plotData$PlotVar)] <- NA
   # }
 
-  p <- ggplot(plotData, aes(ggplot_long, ggplot_lat)) +
+  p <- ggplot(plotData, aes(.data$ggplot_long, .data$ggplot_lat)) +
     geom_polygon_interactive(aes(
-      fill = PlotVar, group = knkod,
-      tooltip = ttip, data_id = knkod
+      fill = .data$PlotVar, group = .data$knkod,
+      tooltip = .data$ttip, data_id = .data$knkod
     )) +
     coord_equal() +
     theme(
