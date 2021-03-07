@@ -82,6 +82,8 @@ createDocumentedTableFromXML <- function(pathToXML) {
       # Having created Level objects for each level, we can now create the Column object:
       currentColumnObject <- Column(name = curColName, aliases = curColAliases, levelsType = curColLevelsType, colLevels = curColLevelObjects)
     } else {
+      #TODO: Add a test that hits this case? It is the only uncovered line in the entire file. Or perhaps refactor to make use of the extensive
+      # testing of XML documentation, so this check isn't needed here.
       # All columns must have one of these three level types, so the XML is invalid and we stop:
       stop("XML file attempted to specify an invalid levelsType. This violates the XSD for XML documentation -- make sure you validate your XML files.")
     }
