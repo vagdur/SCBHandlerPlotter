@@ -14,16 +14,21 @@
 # (This function was previously exported.)
 
 fillOutMapPlotFrame <- function(dat) {
-  allMunicipalities <- levels(swe_kommuner_allpoints$knnamn)
-
-  present_muns <- unique(dat[, 1])
-  nonpresent <- allMunicipalities[!(allMunicipalities %in% present_muns)]
-  for (mun in nonpresent) {
+  # First, what are the unique values of the first column? These should ideally be names of municipalities.
+  presentMunicipalities <- unique(dat[, 1])
+  # Which of the municipalities of Sweden are not present in the list?
+  nonPresentMunicipalities <- municipalityNames[!(municipalityNames %in% presentMunicipalities)]
+  # Add one row per municipality that is not present, containing the name of that municipality in the first
+  # column and NA in every other column:
+  for (municipality in nonPresentMunicipalities) {
     row <- nrow(dat) + 1
-    dat[row, 1] <- mun
-    dat[row, 2] <- NA
+    dat[row, ] <- NA
+    dat[row, 1] <- municipality
   }
-  return(dat[dat[, 1] %in% allMunicipalities, ])
+  # Finally, we return our data frame, stripping out every row whose first element is not the name of a municipality.
+  # So we are guaranteed to be returning a data frame that contains at least one row per municipality, and no rows that
+  # do not correspond to a municipality.
+  return(dat[dat[, 1] %in% municipalityNames, ])
 }
 
 #' Create interactive plot of data on map of Sweden
@@ -51,39 +56,128 @@ fillOutMapPlotFrame <- function(dat) {
 #' @export
 
 plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendTitle = "") {
-  if (is.null(ncol(dat))) {
+  # First thing to check is if the data we got is in the format of a named vector of things to plot,
+  # or is a data frame, and then for each case check that it has the requisite information.
+  # It is a little tricky to know precisely what type we want to require the vector to be, since
+  # the only real requirement is that it be plottable by ggplot2. We choose to be permissive and
+  # say any atomic type is okay, though some might result in ugly plots:
+  if (is.atomic(dat)) {
+    # So we have the vector case. Then, we need the vector to have names:
     if (!is.null(names(dat))) {
-      muns <- names(dat)
-      dat <- data.frame(muns, dat)
+      # So it has names, and we can transform this input into a data frame, which is what the rest of the code will want:
+      presentMunicipalityNames <- names(dat)
+      dat <- data.frame(presentMunicipalityNames, dat)
+    } else {
+      # No name, no game. We throw an error. Note that we aren't checking that the names are names of municipalities --
+      # any irregularities will get sorted out by fillOutMapPlotFrame. But passing something without names entirely is almost
+      # surely a mistake, since it could never work, so it's best to tell the user that it is an error:
+      stop("If supplying a vector to plotOnMap, that vector must be named, with names corresponding to municipalities.")
     }
+  } else if (is.data.frame(dat)) {
+    # The other acceptable case. Here, the first column should be of type character (and contain municipality names), and there
+    # should be at least two columns, since we plot the second column:
+    if (ncol(dat) < 2) {
+      stop("When passing a data frame, it must have at least two columns -- the first should contain municipality names, the second the data to plot, and further columns are ignored.")
+    }
+    if(!(is.character(dat[,1]))) {
+      stop("The first column must be of type character, because it should contain names of municipalities.")
+    }
+    if (ncol(dat) > 2) {
+      warning("You passed a data frame with more than two columns to be plotted. The columns after the first two will be ignored.")
+    }
+  } else {
+    # The user has passed an invalid data type:
+    stop("Input to plot must be either a named vector or a data frame.")
   }
+
+  # Now we at least know that we have a data frame of the right form. Time to make sure all its rows are
+  # municipalities, and every municipality has at least one row:
   dat <- fillOutMapPlotFrame(dat)
-  colnames(dat) <- c("knnamn", "PlotVar")
+
+  # Next, we need to make sure that no municipality has multiple rows:
+  if (length(unique(dat[,1])) != length(dat[,1])) {
+    # Multiple rows for one municipality means we don't know which to plot:
+    stop("You must not supply more than one data point per municipality, otherwise we can't know which to use in the plot.")
+  }
+
+  # Having made sure we have data of the right format to plot, it is time to attach it to the map, so it can be plotted.
+  # To do this we must know what the column names are, so we pick "knnamn" (since that is what the municipality name column
+  # is called in the map data) and "PlotVar", for "variable we want to plot":
+  colnames(dat) <- c(1:ncol(dat)) # Just making sure there isn't already a column with one of those names
+  colnames(dat)[1:2] <- c("knnamn", "PlotVar")
+  # Then, we join the data frame of data to plot to the map. Note that "swe_kommuner_allpoints" is stored in the internal data
+  # of the library, and contains the map of the municipalities of Sweden.
   plotData <- dplyr::left_join(swe_kommuner_allpoints, dat, by = "knnamn")
-  if (identical(NA, tooltips)) {
+
+  # Having created the data frame we will be passing to ggplot, it is time to consider what tooltips we want. We can auto-generate
+  # tooltips if the parameter is missing, and if it is not missing, we check that they are in the right format and use those instead.
+  # Passing tooltips works precisely like passing the data itself -- either a named vector or a data frame.
+  if (missing(tooltips)) {
+    # So we need to create tooltips. This is pretty easily done: In the case where the data to plot is numeric,
+    # we round it to two decimal places first and then paste it together, otherwise we just paste immediately:
     if (is.numeric(plotData$PlotVar)) {
       roundedPlotVar <- round(plotData$PlotVar, 2)
-      tooltips <- paste(plotData$knnamn, rep(": ", length(plotData$knnamn)), roundedPlotVar)
+      tooltips <- paste(plotData$knnamn, rep(": ", length(plotData$knnamn)), roundedPlotVar, sep="")
     } else {
-      tooltips <- paste(plotData$knnamn, rep(": ", length(plotData$knnamn)), plotData$PlotVar)
+      tooltips <- paste(plotData$knnamn, rep(": ", length(plotData$knnamn)), plotData$PlotVar, sep="")
     }
-    plotData$ttip <- tooltips
-  } else if (ncol(tooltips) == 2) {
+    plotData$tooltips <- tooltips
+  } else if (is.data.frame(tooltips)) {
+    # In the case where we have been passed a data frame, we check the column types and numbers, and then
+    # pass it to fillOutMapPlotFrame to add any missing tooltips, and finally check that we have one tooltip
+    # per municipality, before adding the tooltips to the plotData.
+    if (ncol(tooltips) < 2) {
+      stop("When passing tooltips as a data frame, we need at least two columns: the first with the name of the municipality to which the tooltip belongs, the second with the tooltip itself. Further columns are ignored.")
+    }
+    if (!is.character(tooltips[,1])) {
+      stop("When passing tooltips as a data frame, the first column must be of type character, containing the names of municipalities to which the tooltips belong.")
+    }
+    if (!is.character(tooltips[,2])) {
+      stop("When passing tooltips as a data frame, the second column must be of type character, containing the tooltips themselves.")
+    }
+    if (ncol(tooltips) > 2) {
+      warning("You passed a data frame with more than two columns as tooltips. The columns after the first two will be ignored.")
+    }
+
+    # Now we make sure to have one tooltip per municipality and no extra rows that do not correspond to municipalities:
+    tooltips <- fillOutMapPlotFrame(tooltips)
+    if (length(unique(tooltips[,1]))!=length(tooltips[,1])) {
+      stop("You must only provide one tooltip per municipality. Found a repeated municipality in first column of tooltips.")
+    }
+
+    # Finally, we can add the tooltips into plotData. First we need to make sure they have the right column names, though:
+    colnames(tooltips) <- c(1:ncol(tooltips)) # Just making sure there isn't already a column with one of those names
+    colnames(tooltips)[1:2] <- c("knnamn", "tooltip")
     plotData <- dplyr::left_join(plotData, tooltips, by = "knnamn")
+  } else if (is.character(tooltips)) {
+    # So we are in the case where we've been passed a vector of tooltips. First, of course, we check that it has names:
+    if (is.null(names(tooltips))) {
+      stop("When passing tooltips as a vector of the tooltips, each must be named with the municipality it corresponds to. Found no names of tooltips at all.")
+    }
+    # Then, that the names are precisely one per municipality:
+    if (!(all(names(tooltips) %in% municipalityNames) && all(municipalityNames %in% names(tooltips)) && (length(names(tooltips)) == length(municipalityNames)))) {
+      #TODO: This behaviour is inconsistent with the data.frame case, where it is okay to be missing some municipalities, and they are filled in with NA tooltips.
+      stop("When passing tooltips as a named vector of characters, each municipality must have exactly one tooltip.")
+    }
+    # So we have data of the right form. Time to add it to the plotting data:
+    tooltips <- data.frame(knnamn = names(tooltips), tooltip = tooltips)
+    plotData <- dplyr::left_join(plotData, tooltips, by = "knnamn")
+  } else {
+    # So tooltips is of the wrong type. We throw an error:
+    stop("Invalid specification of tooltips. Either omit the parameter to get automatically generated tooltips, or pass them as a data frame or a named vector.")
   }
 
-  # This doesn't work, the tooltip just displays as NA instead of not showing at all:
-  # if (hideNAtooltips) {
-  #  plotData$ttip[is.na(plotData$PlotVar)] <- NA
-  # }
+  #TODO: Figure out how to display only some tooltips. Supplying NA for the tooltip text does not hide it, it just displays NA.
 
-  p <- ggplot(plotData, aes(.data$ggplot_long, .data$ggplot_lat)) +
-    geom_polygon_interactive(aes(
+  # Having finally gotten all the data we need in the right format, we create the ggplot object:
+  p <- ggplot(plotData,
+              aes(.data$ggplot_long, .data$ggplot_lat)) + # The coordinates of the map are in ggplot_long and ggplot_lat, for longitude and latitude
+    geom_polygon_interactive(aes( # geom_polygon_interactive is what enables the tooltips and highlight on hover
       fill = .data$PlotVar, group = .data$knkod,
-      tooltip = .data$ttip, data_id = .data$knkod
+      tooltip = .data$tooltip, data_id = .data$knkod
     )) +
-    coord_equal() +
-    theme(
+    coord_equal() + # Needed for the right aspect ratio of the map
+    theme( # Minimal theme, since the data we are presenting is not the latitudes and longitudes;
       axis.text = element_blank(),
       axis.title = element_blank(),
       axis.ticks = element_blank()
@@ -93,17 +187,29 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
       panel.background = element_blank(), axis.line = element_blank()
     )
 
-  if (!is.na(mainTitle)) {
-    if (is.na(subTitle)) {
+  # If we have been given those by the user, we now add main- and subtitles as well as legend titles. Assuming they are of the
+  # correct format, of course.
+  if (!missing(mainTitle)) {
+    if (!(is.character(mainTitle) && length(mainTitle) == 1)) {
+      stop("mainTitle, if not omitted, must be a single object of type character")
+    }
+    if (missing(subTitle)) {
       p <- p + ggtitle(mainTitle)
     } else {
+      if (!(is.character(subTitle) && length(subTitle) == 1)) {
+        stop("subTitle, if not omitted, must be a single object of type character")
+      }
       p <- p + ggtitle(mainTitle, subtitle = subTitle)
     }
   }
-  if (!is.na(legendTitle)) {
+  if (!missing(legendTitle)) {
+    if (!(is.character(legendTitle) && length(legendTitle) == 1)) {
+      stop("legendTitle, if not omitted, must be a single object of type character")
+    }
     p <- p + labs(fill = legendTitle) + theme(legend.title = element_text(size = 8))
   }
 
+  # Finally, we return the ggplot/ggiraph object. The user can plot it with girafe(ggobj=p)
   return(p)
 }
 
@@ -123,8 +229,8 @@ exampleForestPlot <- function() {
   prcSkogsbruk <- sapply(municipalityNames, function(mun) {
     100 * SCB(Municipality = mun, LandUseType = c("skogsmark, produktiv", "skogsmark, improduktiv")) / SCB(Municipality = mun, LandUseType = "Total area")
   })
-  ttip <- paste(municipalityNames, ": ", round(prcSkogsbruk, 1), "%", sep = "")
-  tooltips <- data.frame(knnamn = municipalityNames, ttip = ttip)
+  tooltipTexts <- paste(municipalityNames, ": ", round(prcSkogsbruk, 1), "%", sep = "")
+  tooltips <- data.frame(knnamn = municipalityNames, tooltipText = tooltipTexts)
   prcSkogsbrukFrame <- data.frame(Municipality = names(prcSkogsbruk), PlotVar = prcSkogsbruk)
   # We need to Unicode escape the åäö here, because CRAN gets unhappy if non-ASCII characters are included in code, even if it is just a hardcoded string:
   return(plotOnMap(prcSkogsbrukFrame, tooltips = tooltips, mainTitle = "Procent av Sveriges kommuners yta som \u00E4r skog", subTitle = "Data fr\u00E5n SCB", legendTitle = "Pct."))
