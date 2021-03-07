@@ -1,5 +1,6 @@
 <!-- badges: start -->
   [![Codecov test coverage](https://codecov.io/gh/vagdur/SCBHandlerPlotter/branch/main/graph/badge.svg)](https://codecov.io/gh/vagdur/SCBHandlerPlotter?branch=main)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvagdur%2FSCBHandlerPlotter.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvagdur%2FSCBHandlerPlotter?ref=badge_shield)
   [![Build Status](https://travis-ci.com/vagdur/SCBHandlerPlotter.svg?branch=main)](https://travis-ci.com/vagdur/SCBHandlerPlotter)
 <!-- badges: end -->
 
@@ -25,3 +26,7 @@ The library can be installed using
 ## Data sources
 
 All tables except one are from SCB, one is from Skolverket. The map of Sweden is from SCB, via the package [swemaps](https://github.com/reinholdsson/swemaps).
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvagdur%2FSCBHandlerPlotter.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvagdur%2FSCBHandlerPlotter?ref=badge_large)
