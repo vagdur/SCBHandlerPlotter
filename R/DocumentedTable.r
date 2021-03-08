@@ -299,11 +299,13 @@ setMethod("levelDealias", "Column", function(x, toDealias) {
         # More than one level succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
         # that has been tested, this is impossible. We throw an error.
         stop("More than one level succeeded in dealiasing. Are you sure your column has been constructed correctly?")
-      } else {
+      } else { # nocov start
         # This really should not be possible. Since there should be no way to reach this point, we throw an error here
-        # to be alerted if our assumptions that this is unreachable are violated:
+        # to be alerted if our assumptions that this is unreachable are violated. Because this should be unreachable,
+        # there should be no way to write a test that covers this case, and thus we exclude it from our measurement
+        # of test coverage.
         stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
-      }
+      } # nocov end
     } else {
       # This should be impossible -- levelsType has to be one of those three values
       stop("Column has invalid levelsType.")
@@ -500,12 +502,13 @@ setMethod("columnDealias", "DocumentedTable", function(x, toDealias) {
     } else if (length(dealiasingResults) > 1) {
       # More than one column succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
       # that has been tested, this is impossible. We throw an error.
-      stop("More than one column succeeded in dealiasing. Are you sure your column has been constructed correctly?")
-    } else {
+      stop("More than one column succeeded in dealiasing. Are you sure your table has been constructed correctly?")
+    } else { #nocov start
       # This really should not be possible. Since there should be no way to reach this point, we throw an error here
       # to be alerted if our assumptions that this is unreachable are violated:
       stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
-    }
+      # Since this case should be completely impossible, so should writing a test that hits it. Thus we exclude it from test coverage stats.
+    } # nocov end
   })))
 })
 
@@ -572,7 +575,7 @@ setMethod("query", "DocumentedTable", function(x, verbose=FALSE, checkHandleable
         stop("Unable to handle this query, either a column name or a level did not match what the table contains.")
       } else {
         warning("Unable to handle this query, either a column name or a level did not match what the table contains. Returning NA.")
-        return(NA_integer_)
+        return(NA_real_)
       }
     }
   }
