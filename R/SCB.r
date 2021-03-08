@@ -58,12 +58,12 @@ SCB <- function(verbose = FALSE, forceTable = NA_character_, failIfUnable = FALS
       stop(paste(forceTable,"is not the name of a table."))
     }
     # We check that the table asked for can actually handle the query:
-    if(!canHandleQuery(allLoadedTables[[which(loadedTableNames == forceTable)]])) {
+    if(!canHandleQuery(allLoadedTables[[which(loadedTableNames == forceTable)]], ...)) {
       # If it can't, we either throw an error or return NA with a warning, depending on the value of failIfUnable:
       if (failIfUnable) {
-        stop("Table that query was forced to via forceTable is unable to handle the query.")
+        stop("The table that the query was forced to via forceTable is unable to handle the query.")
       } else {
-        warning("Table that query was forced to via forceTable is unable to handle the query. Returning NA.")
+        warning("The table that the query was forced to via forceTable is unable to handle the query. Returning NA.")
         return(NA_real_)
       }
     } else {
@@ -71,7 +71,7 @@ SCB <- function(verbose = FALSE, forceTable = NA_character_, failIfUnable = FALS
       # if it can handle the query, since we already did that for it.
       return(query(allLoadedTables[[which(loadedTableNames == forceTable)]], checkHandleable = FALSE, verbose = verbose, ...))
     }
-  } else {
+  } else { #forceTable is missing:
     # This should be the more common case -- we first need to figure out what table to send the query to, and then
     # do it. The first part can be done in one line with a judicious use of sapply:
     tablesAbleToHandleQuery <- which(sapply(allLoadedTables, function(tab) canHandleQuery(tab,...)))
