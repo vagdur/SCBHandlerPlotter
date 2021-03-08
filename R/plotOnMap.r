@@ -9,9 +9,11 @@
 
 # This function takes a data frame consisting of one column of municipality names and one column of data for each municipality,
 # and adds a row for each municipality that is not present, with NA in the data column. It also strips out any row which does
-# not have the name of a municipality in the first column. It is called by plotOnMap on all of its inputs, so it doesn't really
-# need to be exported for use by package users -- the only usecase is to make plotting easier, but now that is not necessary.
-# (This function was previously exported.)
+# not have the name of a municipality in the first column. Finally, it resets the row names of the data frame to just numbering them.
+# (This last bit is mostly useful to make the testing easier -- the row names should never be getting used anyway.)
+
+# It is called by plotOnMap on all of its inputs, so it doesn't really need to be exported for use by package users -- the only
+# usecase is to make plotting easier, but now that is not necessary. (This function was previously exported.)
 
 fillOutMapPlotFrame <- function(dat) {
   # First, we need to validate our input: Is it a data frame with at least two columns, the first of which is of type
@@ -32,13 +34,16 @@ fillOutMapPlotFrame <- function(dat) {
   # column and NA in every other column:
   for (municipality in nonPresentMunicipalities) {
     row <- nrow(dat) + 1
-    dat[row, ] <- NA
+    dat[row, ] <- NA_real_ # Still uncertain what type of NA to put here to be honest... It appears that the NAs get coerced to the right type of NA anyway?
     dat[row, 1] <- municipality
   }
-  # Finally, we return our data frame, stripping out every row whose first element is not the name of a municipality.
+  # Finally, we strip out every row whose first element is not the name of a municipality.
   # So we are guaranteed to be returning a data frame that contains at least one row per municipality, and no rows that
   # do not correspond to a municipality.
-  return(dat[dat[, 1] %in% municipalityNames, ])
+  dat <- dat[dat[, 1] %in% municipalityNames, ]
+  # And reset the row names:
+  rownames(dat) <-  c(1:nrow(dat))
+  return(dat)
 }
 
 #' Create interactive plot of data on map of Sweden
