@@ -14,6 +14,16 @@
 # (This function was previously exported.)
 
 fillOutMapPlotFrame <- function(dat) {
+  # First, we need to validate our input: Is it a data frame with at least two columns, the first of which is of type
+  # character?
+  if (!is.data.frame(dat)) {
+    stop("The argument to fillOutMapPlotFrame must be a data frame.")
+  } else if (ncol(dat) < 2) {
+    stop("The data frame passed to fillOutMapPlotFrame must have at least two columns.")
+  } else if (!is.character(dat[, 1])) {
+    stop("The first column of the data frame passed to fillOutMapPlotFrame must be of type character.")
+  }
+
   # First, what are the unique values of the first column? These should ideally be names of municipalities.
   presentMunicipalities <- unique(dat[, 1])
   # Which of the municipalities of Sweden are not present in the list?
