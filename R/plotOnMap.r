@@ -105,6 +105,22 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
     stop("Input to plot must be either a named vector or a data frame.")
   }
 
+  # We also check that our title parameters are given correctly -- they should either be missing
+  # or be character of length 1:
+  if (!(missing(mainTitle) || (is.character(mainTitle) && length(mainTitle) == 1))) {
+    stop("mainTitle, if not omitted, must be a single object of type character")
+  }
+  if (!(missing(subTitle) || (is.character(subTitle) && length(subTitle) == 1))) {
+    stop("subTitle, if not omitted, must be a single object of type character")
+  }
+  if (!(missing(legendTitle) || (is.character(legendTitle) && length(legendTitle) == 1))) {
+    stop("legendTitle, if not omitted, must be a single object of type character")
+  }
+  # A subtitle won't be shown if the main title is missing, so if this is the case we give a warning:
+  if (missing(mainTitle) && !missing(subTitle)) {
+    warning("A subtitle won't be shown if the main title is missing")
+  }
+
   # Now we at least know that we have a data frame of the right form. Time to make sure all its rows are
   # municipalities, and every municipality has at least one row:
   dat <- fillOutMapPlotFrame(dat)
@@ -205,22 +221,13 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
   # If we have been given those by the user, we now add main- and subtitles as well as legend titles. Assuming they are of the
   # correct format, of course.
   if (!missing(mainTitle)) {
-    if (!(is.character(mainTitle) && length(mainTitle) == 1)) {
-      stop("mainTitle, if not omitted, must be a single object of type character")
-    }
     if (missing(subTitle)) {
       p <- p + ggtitle(mainTitle)
     } else {
-      if (!(is.character(subTitle) && length(subTitle) == 1)) {
-        stop("subTitle, if not omitted, must be a single object of type character")
-      }
       p <- p + ggtitle(mainTitle, subtitle = subTitle)
     }
   }
   if (!missing(legendTitle)) {
-    if (!(is.character(legendTitle) && length(legendTitle) == 1)) {
-      stop("legendTitle, if not omitted, must be a single object of type character")
-    }
     p <- p + labs(fill = legendTitle) + theme(legend.title = element_text(size = 8))
   }
 
