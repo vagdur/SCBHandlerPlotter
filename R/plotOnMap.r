@@ -152,7 +152,7 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
     } else {
       tooltips <- paste(plotData$knnamn, rep(": ", length(plotData$knnamn)), plotData$PlotVar, sep="")
     }
-    plotData$tooltips <- tooltips
+    plotData$tooltip <- tooltips
   } else if (is.data.frame(tooltips)) {
     # In the case where we have been passed a data frame, we check the column types and numbers, and then
     # pass it to fillOutMapPlotFrame to add any missing tooltips, and finally check that we have one tooltip
