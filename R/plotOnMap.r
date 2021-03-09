@@ -185,13 +185,13 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
     if (is.null(names(tooltips))) {
       stop("When passing tooltips as a vector of the tooltips, each must be named with the municipality it corresponds to. Found no names of tooltips at all.")
     }
-    # Then, that the names are precisely one per municipality:
-    if (!(all(names(tooltips) %in% municipalityNames) && all(municipalityNames %in% names(tooltips)) && (length(names(tooltips)) == length(municipalityNames)))) {
-      #TODO: This behaviour is inconsistent with the data.frame case, where it is okay to be missing some municipalities, and they are filled in with NA tooltips.
-      stop("When passing tooltips as a named vector of characters, each municipality must have exactly one tooltip.")
-    }
-    # So we have data of the right form. Time to add it to the plotting data:
+    # So we reshape this into a data frame:
     tooltips <- data.frame(knnamn = names(tooltips), tooltip = tooltips)
+    # Now we make sure to have one tooltip per municipality and no extra rows that do not correspond to municipalities:
+    tooltips <- fillOutMapPlotFrame(tooltips)
+    if (length(unique(tooltips[,1]))!=length(tooltips[,1])) {
+      stop("You must only provide one tooltip per municipality. Found a repeated municipality in first column of tooltips.")
+    }
     plotData <- dplyr::left_join(plotData, tooltips, by = "knnamn")
   } else {
     # So tooltips is of the wrong type. We throw an error:
