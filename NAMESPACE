@@ -3,6 +3,7 @@
 export(SCB)
 export(exampleForestPlot)
 export(plotOnMap)
+export(vectorSCB)
 import(ggiraph)
 import(ggplot2)
 import(methods)
