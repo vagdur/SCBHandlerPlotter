@@ -116,12 +116,14 @@ writeTextDocumentation <- function(filename) {
 
 
 # This function takes as argument the folder where the XML documentation is stored and the folder where the .Rd documentation should be stored.
-# It then runs writeTextDocumentation on each XML file in sourceFolder, and writes the result to targetFolder as an .Rd file.
+# It then runs writeTextDocumentation on each XML file in sourceFolder, and writes the result to targetFolder as an .Rd file. It also writes
+# out a line to manually add to the Roxygen documentation of SCB(), since this seems to be the easiest way to deal with this issue.
 writeAllTextDocumentation <- function(sourceFolder, targetFolder) {
   # Find all the XML files:
   xmlFilesInSourceFolder <- list.files(sourceFolder, pattern="*\\.xml$")
   # We also need these with .Rd as their file extension, since we need to save them:
   filenamesWithRdExtension <- gsub("\\.xml","\\.Rd",xmlFilesInSourceFolder)
+
   # Now we loop over the files and print each of them to the target folder:
   for (fileIndex in c(1:length(xmlFilesInSourceFolder))) {
     targetFilePath <- paste(targetFolder,"/",filenamesWithRdExtension[fileIndex],sep="")
@@ -138,4 +140,10 @@ writeAllTextDocumentation <- function(sourceFolder, targetFolder) {
     close(fileConn)
     message(paste("Wrote documentation based on",xmlFilesInSourceFolder[fileIndex]))
   }
+
+  # Finally, we create the seealso tag needed in SCB() to give a list of the tables:
+  seeAlsoBlock <- paste("@seealso The available tables are documented at: ", paste(loadedTableNames, collapse=", "), ".", sep="")
+  message(paste("Add the following line to the end of the SCB() Roxygen documentation, replacing the old @seealso:\n",seeAlsoBlock,sep=""))
 }
+# If you are in the main library folder, the above function can be run as:
+# writeAllTextDocumentation("./inst/extdata","./man")
