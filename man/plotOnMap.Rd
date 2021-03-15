@@ -34,3 +34,6 @@ exampledata <- data.frame(municipality = c("Stockholm", "Lund", "Uppsala"),
                           students = c("some", "many", "loads"))
 girafe(ggobj = plotOnMap(exampledata))
 }
+\seealso{
+exampleForestPlot
+}

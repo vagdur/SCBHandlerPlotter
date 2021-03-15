@@ -15,4 +15,8 @@ forests.
 library(ggplot2)
 library(ggiraph)
 girafe(ggobj = exampleForestPlot())
+
+}
+\seealso{
+plotOnMap
 }

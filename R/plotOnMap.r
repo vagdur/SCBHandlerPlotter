@@ -68,6 +68,8 @@ fillOutMapPlotFrame <- function(dat) {
 #' girafe(ggobj = plotOnMap(exampledata))
 #' @returns A ggplot object that can be turned into an interactive graphic with the girafe function, see the example.
 #'
+#' @seealso exampleForestPlot
+#'
 #' @export
 
 plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendTitle = "") {
@@ -245,6 +247,9 @@ plotOnMap <- function(dat, tooltips = NA, mainTitle = NA, subTitle = NA, legendT
 #' library(ggplot2)
 #' library(ggiraph)
 #' girafe(ggobj = exampleForestPlot())
+#'
+#' @seealso plotOnMap
+#'
 #' @export
 
 exampleForestPlot <- function() {
