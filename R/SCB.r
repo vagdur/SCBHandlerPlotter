@@ -35,6 +35,7 @@
 #' SCB(Municipality = "Lomma", LandUseType = "Total forest")
 #' @returns A numeric value. What this value represents can vary greatly by your specific query -- it could be anything from an amount of people to a tax rate to an area of land.
 #'
+#' @seealso The available tables are documented at: AgeGender, BirthRegion, EducationLevel, MunicipalIncomeStatements, HighSchoolEligibility, HouseholdSize, HousingForm, Incomes, LandUse, MaritalStatus, TaxRates.
 #' @export
 SCB <- function(verbose = FALSE, forceTable = NA_character_, failIfUnable = FALSE, collisionHandlingMode = "error", ...) { # All the juice is of course in the innocuous-looking "..."
   # So we have received a query. There are two cases: Either forceTable is set, in which case we just funnel the query

@@ -56,3 +56,6 @@ SCB(Municipality = "Uppsala", Age=24, Gender="Women", MaritalStatus = "Divorced"
 # How much forest was there in Lomma municipality in 2015?
 SCB(Municipality = "Lomma", LandUseType = "Total forest")
 }
+\seealso{
+The available tables are documented at: AgeGender, BirthRegion, EducationLevel, MunicipalIncomeStatements, HighSchoolEligibility, HouseholdSize, HousingForm, Incomes, LandUse, MaritalStatus, TaxRates.
+}
