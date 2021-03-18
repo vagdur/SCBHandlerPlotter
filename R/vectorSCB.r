@@ -67,6 +67,9 @@ vectorSCB <- function(vectorColumn, verbose=FALSE, forceTable = NA_character_, .
   if (vectorColumnName %in% names(list(...))) {
     # So the user provided this parameter, and our life is easy:
     levelsToVector <- list(...)[[vectorColumnName]]
+
+    # We could do some error handling here, checking whether the column and levels the user specified actually exist. But that is handled
+    # by SCB() when we call it, so we let it handle that check.
   } else {
     # The user did not provide an explicit list of values to vector over. Again, there are two cases:
     # If the user provided a forceTable, then we know which table to look for the levels of the column in.
