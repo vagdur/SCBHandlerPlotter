@@ -16,7 +16,8 @@ RoxygenNote: 7.1.1
 Imports:
     xml2,
     methods,
-    dplyr (>= 1.0.2)
+    dplyr (>= 1.0.2),
+    rlang
 Depends: 
     R (>= 2.10),
     ggiraph (>= 0.7.8),
