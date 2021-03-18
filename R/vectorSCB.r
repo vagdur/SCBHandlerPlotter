@@ -33,6 +33,24 @@
 #' @export
 
 vectorSCB <- function(vectorColumn, verbose=FALSE, forceTable = NA_character_, ...) {
+  # First off, let us validate the input types:
+  if (!missing(verbose)) {
+    if (!is.logical(verbose)) {
+      stop(paste("Argument verbose is expected to be TRUE/FALSE, not",typeof(verbose)))
+    }
+    if (length(verbose) != 1) {
+      stop("Argument verbose is expected to be a single value, not a vector.")
+    }
+  }
+  if (!missing(forceTable)) {
+    if (!is.character(forceTable)) {
+      stop(paste("Argument verbose is expected to be character, not",typeof(verbose)))
+    }
+    if (length(forceTable) != 1) {
+      stop("Argument forceTable is expected to be a single value, not a vector.")
+    }
+  }
+
   # Some metaprogramming magic extracts the name of the column over which we will vectorise:
   vectorColumnName <- as.character(rlang::get_expr(rlang::enquo(vectorColumn)))
 
