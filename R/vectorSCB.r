@@ -36,6 +36,12 @@ vectorSCB <- function(vectorColumn, verbose=FALSE, forceTable = NA_character_, .
   # Some metaprogramming magic extracts the name of the column over which we will vectorise:
   vectorColumnName <- as.character(rlang::get_expr(rlang::enquo(vectorColumn)))
 
+  # If this results in a vector of length greater than one, the user passed us some more complicated
+  # expression than just a name, which we can't handle: (And if we get length 0, they passed NULL)
+  if (length(vectorColumnName) != 1) {
+    stop("You appear to have passed a complicated expression into vectorColumn. This is not evaluated -- if you want your arguments evaluated, use the !! operator provided by library rlang.")
+  }
+
   # Next up, we need to figure out what levels of this column we are to vectorise over. There are
   # two cases -- either the user provided this list, or they expect to vectorise over all possible
   # values:
