@@ -26,6 +26,7 @@
 #' vectorSCB(Municipality = "Ludvika", vectorColumn = LandUseType)
 #' # In order to use a column whose name is stored in a variable, use !! like this:
 #' # (!! is provided by the library rlang.)
+
 #' columnToVector <- "Municipality"
 #' vectorSCB(Gender = "Male", forceTable = "AgeGender", vectorColumn = !!columnToVector)
 #'
