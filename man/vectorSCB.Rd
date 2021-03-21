@@ -36,7 +36,8 @@ The verbose parameter still exists, with the same effect, but failIfUnable and e
 vectorSCB(LandUseType = "Total forest", vectorColumn = Municipality)
 # How much land is used for each type of use in Ludvika municipality?
 vectorSCB(Municipality = "Ludvika", vectorColumn = LandUseType)
-# In order to use a column whose name is stored in a variable, use !! like this: (!! is provided by the library rlang.)
+# In order to use a column whose name is stored in a variable, use !! like this:
+# (!! is provided by the library rlang.)
 columnToVector <- "Municipality"
 vectorSCB(Gender = "Male", forceTable = "AgeGender", vectorColumn = !!columnToVector)
 
