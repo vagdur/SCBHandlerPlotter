@@ -27,60 +27,70 @@
 # S4 classes, so instead of writing methods:: every time, we just import it:
 #' @import methods
 
-# We start by defining the generics we will want in several classes:
+##########################################################################################
+# Definition of the Dealiasable class
+
+# One thing that all three layers of a DocumentedTable (the table itself, its columns, and
+# the levels of a column) have in common is that they have a name and some aliases, and we
+# will want to dealias strings against them. That is, we will want a method that takes a string
+# and checks if that string is either the name of the object or in its list of aliases, and
+# either returns the object's name if it is or NULL if it is not.
+#
+# So, since this is a shared feature of several classes, it makes sense to have this behaviour
+# defined by a superclass from which they all inherit. We implement this as a virtual class,
+# since there is no reason to want to have objects that are of just this class.
+
+setClass("Dealiasable",
+         contains = "VIRTUAL", # This is a virtual class
+         slots = c(name = "character",
+                   aliases = "character"),
+         prototype = c(name = NA_character_,
+                       aliases = character(0)))
+# Since the class is virtual, we do not define any constructor of it -- no objects can exist.
+# We do however define a validity function for it:
+setValidity("Dealiasable", function(object) {
+  # We have two requirements:
+  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
+  #   2. That aliases not contain any NA or empty strings
+  if (length(object@name) != 1) {
+    return("The length of name must be exactly one.")
+  }
+  if (is.na(object@name) || object@name == "") {
+    return("name must not be NA or empty string.")
+  }
+  if (length(object@aliases) > 0) {
+    if (any(is.na(object@aliases) || object@aliases == "")) {
+      return("aliases must not contain NA or empty string.")
+    }
+  }
+  return(TRUE)
+})
+
+# As we said, there are a few methods that should be shared, so we define those:
 setGeneric("name", function(x) standardGeneric("name"))
 setGeneric("name<-", function(x, value) standardGeneric("name<-"))
 setGeneric("aliases", function(x) standardGeneric("aliases"))
 setGeneric("aliases<-", function(x,value) standardGeneric("aliases<-"))
 setGeneric("dealias", function(x, toDealias) standardGeneric("dealias"))
 
-##########################################################################################
-# Definition of the Level class
-
-# Create the class:
-setClass("Level",
-         slots = c(
-           name = "character",
-           aliases = "character"
-         ),
-         prototype = c(
-           name = NA_character_,
-           aliases = NA_character_
-         ))
-# Define a constructor: (A very simple thing indeed.)
-Level <- function(name, aliases=character(0)) {
-  new("Level", name = name, aliases = aliases)
-}
-# Define a validator:
-setValidity("Level", function(object) {
-  # We only check that the level name is just a single string. We should perhaps check that it is valid
-  # as an entry in a csv file, but that is much more complicated, so we "test" that by throwing an error
-  # at some later point if the csv handling breaks or something. The easiest way to test if a value will
-  # work is to try to use it and see what happens, after all.
-  if (length(object@name) != 1) {
-    return("Name of level should be a single string, not a vector")
-  }
-  return(TRUE)
-})
 # Define setter and getter for name and aliases:
-setMethod("name", "Level", function(x) x@name)
-setMethod("name<-", "Level", function(x,value) {
+setMethod("name", "Dealiasable", function(x) x@name)
+setMethod("name<-", "Dealiasable", function(x,value) {
   x@name <- value
   validObject(x)
   x
 })
-setMethod("aliases", "Level", function(x) x@aliases)
-setMethod("aliases<-","Level", function(x, value) {
+setMethod("aliases", "Dealiasable", function(x) x@aliases)
+setMethod("aliases<-", "Dealiasable", function(x, value) {
   x@aliases <- value
   validObject(x)
   x
 })
-# Define the dealias method. This method takes a string, and checks if it is either the name or the level or one
-# of the defined aliases. If it is, it returns the name of the level. Otherwise, it returns NULL. Actually, it does
-# this in a vectorised way, so calling dealias(aLevel,c("Men","Women")) returns a list of the results of applying this
+# Define the dealias method. This method takes a string, and checks if it is either the name of the object or one
+# of the defined aliases. If it is, it returns the name of the object. Otherwise, it returns NULL. Actually, it does
+# this in a vectorised way, so calling dealias(object,c("Men","Women")) returns a list of the results of applying this
 # procedure in each argument.
-setMethod("dealias","Level", function(x, toDealias) {
-  # Not the prettiest code ever, but it does precisely what was described:
+setMethod("dealias","Dealiasable", function(x, toDealias) {
   return(unname(unlist(sapply(toDealias, function(str) {
     if (str == x@name) {
       x@name
@@ -92,46 +102,37 @@ setMethod("dealias","Level", function(x, toDealias) {
   }))))
 })
 
+##########################################################################################
+# Definition of the Level class
+
+# A level contains no information beyond its name and aliases, so this just inherits from
+# Dealiasable without new slots or methods:
+
+# Create the class:
+setClass("Level",
+         contains = "Dealiasable")
+# Define a constructor: (A very simple thing indeed.)
+Level <- function(name, aliases=character(0)) {
+  new("Level", name = name, aliases = aliases)
+}
+
 ####################################################################################
 # Definition of the Column class, from which CharacterColumn, NumericColumn, and
 # MunicipalitiesColumn inherit.
 
-# Create the base class, which just contains the name and aliases of a Column but has no type.
+# Create the base class, which just inherits straight from Dealiasable to get a name and aliases
+# slot. Then the three subclasses can add new slots to contain information specific to their type
+# of column.
 # Note that this is a virtual class -- there can be no objects solely of class Column, only of
 # the three classes that inherit from it.
 setClass("Column",
-         contains = "VIRTUAL",
-         slots = c(
-           name = "character",
-           aliases = "character"
-         ),
-         prototype = c(
-           name = NA_character_,
-           aliases = character(0)
-         ))
+         contains = c("Dealiasable", "VIRTUAL"))
 # There is no constructor of pure Column objects, since such don't exist. Instead, the Column() function
 # figures out from its arguments which type of column you want. Thus, we define it after we define the subclasses.
 
 # For each subclass we define it, a validity function, and a very barebones constructor.
-# First, however, in the principle of DRY, a validity for the shared slots, which each validity
-# function can call:
-columnSharedSlotsValidity <- function(name, aliases) {
-  # We have two requirements:
-  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
-  #   2. That aliases not contain any NA or empty strings
-  if (length(name) != 1) {
-    return("The length of name must be exactly one.")
-  }
-  if (is.na(name) || name == "") {
-    return("name must not be NA or empty string.")
-  }
-  if (length(aliases) > 0) {
-    if (any(is.na(aliases) || aliases == "")) {
-      return("aliases must not contain NA or empty string.")
-    }
-  }
-  return(TRUE)
-}
+# Note that the validity of the shared slots name and aliases is tested by the validity function of the Dealiasable
+# class, the grandparent of these classes.
 
 # A CharacterColumn additionally contains a list of its levels:
 setClass("CharacterColumn",
@@ -142,12 +143,6 @@ setClass("CharacterColumn",
          prototype = c(colLevels = list())
          )
 setValidity("CharacterColumn", function(object) {
-  # First we check the slots that are shared by all Column subclasses:
-  sharedValidity <- columnSharedSlotsValidity(object@name, object@aliases)
-  if (is.character(sharedValidity)) { # If it returns a character, then that character is an error message we just pass on
-    return(sharedValidity)
-  }
-
   # Second, we check that the colLevels slot has length greater than zero and each element is a valid Level object:
   if (length(object@colLevels) == 0) {
     return("A CharacterColumn object needs to have at least one level defined.")
@@ -176,11 +171,6 @@ setClass("NumericColumn",
          prototype = c(maxLevel = numeric(0),
                        minLevel = numeric(0)))
 setValidity("NumericColumn", function(object) {
-  # Again, we start by checking the shared slots:
-  sharedValidity <- columnSharedSlotsValidity(object@name, object@aliases)
-  if (is.character(sharedValidity)) { # If it returns a character, then that character is an error message we just pass on
-    return(sharedValidity)
-  }
   # The only thing we need to check here is that either maxLevel is omitted, or it is of length 1, and the same for minLevel:
   if (length(object@maxLevel) > 1) {
     return("maxLevel should either be omitted (of length 0) or of length 1.")
@@ -198,11 +188,11 @@ NumericColumn <- function(name, aliases=character(0), minLevel = numeric(0), max
 # indeed a column of municipalities:
 setClass("MunicipalitiesColumn",
          contains = "Column")
-setValidity("MunicipalitiesColumn", function(object) {
-  # Since a MunicipalitiesColumn has no extra slots compared to a Column, all we need to do is
-  # check the shared slots:
-  return(columnSharedSlotsValidity(object@name, object@aliases))
-})
+# Since a MunicipalitiesColumn has no extra slots compared to a Column, all the validity testing we
+# need to do is implemented by the validity of the Dealiasable class.
+#setValidity("MunicipalitiesColumn", function(object) {
+#
+#})
 MunicipalitiesColumn <- function(name, aliases=character(0)) {
   new("MunicipalitiesColumn", name = name, aliases = aliases)
 }
@@ -229,21 +219,7 @@ Column <- function(levelsType,
   }
 }
 
-# Define setters and getters for the slots of the Column class:
-setMethod("name","Column", function(x) x@name)
-setMethod("name<-", "Column", function(x,value) {
-  x@name <- value
-  validObject(x)
-  x
-})
-setMethod("aliases", "Column", function(x) x@aliases)
-setMethod("aliases<-","Column", function(x, value) {
-  x@aliases <- value
-  validObject(x)
-  x
-})
-
-# Now, let us define setters and getters of the slots of the subclasses:
+# Define setters and getters of the slots of the subclasses:
 setGeneric("colLevels", function(x) standardGeneric("colLevels"))
 setGeneric("colLevels<-", function(x, value) standardGeneric("colLevels<-"))
 setMethod("colLevels","CharacterColumn", function(x) x@colLevels)
@@ -271,29 +247,11 @@ setMethod("maxLevel<-","NumericColumn", function(x, value) {
   x
 })
 
-# Finally, we define both a dealias and a levelDealias method for a Column. "dealias" works
-# precisely as for a Level -- it looks at the name and aliases of the column, and sends any
-# input that matches the name or the aliases to the name, and any other input to NULL. This
-# can of course be defined at the level of the Column class, since it works the same for any
-# column, only involving the name and aliases slots.
-#
-# For levelDealias, we need to define one method per subclass, to handle the different cases.
-# (Still, this is prettier than the old awful nested conditional.)
-setMethod("dealias", "Column", function(x, toDealias) {
-  # We can actually reuse the code for dealiasing in a Level verbatim.
-  # Normally this might be cause to consider having both inherit from some shared
-  # parent class, but the way this might require multiple inheritance seems like
-  # more headache than it's worth to not repeat eight lines of code twice.
-  return(unname(unlist(sapply(toDealias, function(str) {
-    if (str == x@name) {
-      x@name
-    } else if (str %in% x@aliases) {
-      x@name
-    } else {
-      NULL
-    }
-  }))))
-})
+# Finally, we define a levelDealias function for each subclass. These functions all take as argument
+# a potential value in a column, and either return NULL if it is not actually a level of the column,
+# or return a standardised name for the argument if it is in the column. For NumericColumn and MunicipalitiesColumn,
+# this just means returning the argument, while for CharacterColumn we need to dealias against its constituent
+# levels.
 
 setGeneric("levelDealias", function(x,toDealias) standardGeneric("levelDealias"))
 setMethod("levelDealias", "NumericColumn", function(x, toDealias) {
@@ -377,12 +335,16 @@ setMethod("levelDealias", "MunicipalitiesColumn", function(x, toDealias) {
 #       general format of querying.
 #   4.  canHandleQuery: Checks whether a query makes sense against the table, and returns true or false without actually executing the query.
 #       Used to route queries to the right table when we have a bunch of them. Same arguments as Query, of course.
+#
+# DocumentedTable gets its name slot and setter/getter by inheritance from Dealiasable, so in fact it also has an aliases slot and a dealias
+# method, but this is not currently supported by the XML documentation format from which DocumentedTable objects are created, so in practice
+# the aliases slots is always empty, and dealias() does nothing for this class.
 
 # We start by defining the class:
 setOldClass("data.frame") # Not sure if we really need this? Better safe than sorry.
 setClass("DocumentedTable",
+         contains = "Dealiasable",
          slots = c(
-           name = "character",
            description = "character",
            dataSource = "character",
            dataYear = "numeric",
@@ -391,7 +353,6 @@ setClass("DocumentedTable",
            valueColumn = "character"
          ),
          prototype = c(
-           name = NA_character_,
            description = NA_character_,
            dataSource = NA_character_,
            dataYear = NA_real_,
@@ -417,10 +378,8 @@ setValidity("DocumentedTable", function(object) {
   # We restrict ourselves to a minimum of tests to make sure it isn't completely broken here.
 
   # For the name, description, dataSource, and dataYear, there are no requirements other than their types,
-  # and that they be a single string, not multiple:
-  if (length(object@name) != 1) {
-    return("DocumentedTable should have one name, not zero or multiple.")
-  }
+  # and that they be a single string, not multiple: (The requirement on the name is checked by the validity
+  # of the superclass Dealiasable.)
   if (length(object@description) != 1) {
     return("DocumentedTable should have one description, not zero or multiple.")
   }
@@ -457,13 +416,6 @@ setValidity("DocumentedTable", function(object) {
   return(TRUE)
 })
 # Define setter and getter methods: (I hate how un-DRY this code is... Might be possible to just do this with some fancy meta-programming?)
-setMethod("name","DocumentedTable", function(x) { x@name })
-setMethod("name<-", "DocumentedTable", function(x, value) {
-  x@name <- value
-  validObject(x)
-  x
-})
-
 setGeneric("description", function(x) standardGeneric("description"))
 setGeneric("description<-", function(x, value) standardGeneric("description<-"))
 setMethod("description","DocumentedTable", function(x) x@description)

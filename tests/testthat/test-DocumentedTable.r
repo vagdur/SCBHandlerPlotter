@@ -1,4 +1,40 @@
 ################################################################################
+# Test of the validity of the Dealiasable class. Since this is a virtual class,
+# it is a little bit suspect to be testing anything about it at all, but we do
+# have some shared expectations on the behaviour of the name and aliases field
+# across classes, so I think it makes sense to test them in common here.
+# If we expected to at some point want name and aliases to work differently for
+# different classes -- i.e. having a class implement its own validity checking
+# for name and aliases -- then this would be a bad idea, but that seems very
+# unlikely to happen.
+
+test_that("Validity of Dealiasable works", {
+  # We have two requirements:
+  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
+  #   2. That aliases not contain any NA or empty strings
+  # The function will return a character containing an error message if any of the requirements are violated,
+  # so the way to test this is to expect type character.
+  # Note that we don't expect this function to be testing the types of its inputs, since that is already done
+  # by the underlying S4 system.
+
+  # Since Dealiasable is a virtual class, we need to define a class that inherits from it in order to test
+  # its validity:
+  setClass("TestClass", contains="Dealiasable")
+
+  expect_snapshot_error(new("TestClass", name = character(0), aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = "", aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = NA_character_, aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = c("a", "b"), aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = "n", aliases = c(NA_character_,"b")))
+  expect_snapshot_error(new("TestClass", name = "n", aliases = c("","b")))
+
+  # Finally, some tests of things that should be allowed: One name and zero or more aliases:
+  expect_silent(new("TestClass", name = "n", aliases = c("a","b")))
+  expect_silent(new("TestClass", name = "n", aliases = "a"))
+  expect_silent(new("TestClass", name = "n", aliases = character(0)))
+})
+
+################################################################################
 # Tests of the Level class:
 test_that("Level objects can be created manually", {
   tl <- new("Level", name = "Test", aliases = c("test","tset"))
@@ -99,33 +135,10 @@ test_that("Column constructor can only create column objects from one of the thr
 # that we get an error if we try to create an object whose slots contains things we think
 # it should not be able to contain.
 #
-# In order to do this, we test the function columnSharedSlotsValidity separately, since it
-# checks validity of the name and aliases slots. Then for each subclass we only test its
-# specific slots validities. Further, since creation of the objects has been tested, we know
-# the validity does return TRUE for the cases we expect it to, so we only need to test that
-# it correctly throws an error when we expect it to.
-
-test_that("columnSharedSlotsValidity works", {
-  # We have two requirements:
-  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
-  #   2. That aliases not contain any NA or empty strings
-  # The function will return a character containing an error message if any of the requirements are violated,
-  # so the way to test this is to expect type character.
-  # Note that we don't expect this function to be testing the types of its inputs, since that is already done
-  # by the underlying S4 system.
-
-  expect_type(columnSharedSlotsValidity(name = character(0), aliases = c("a","b")), "character")
-  expect_type(columnSharedSlotsValidity(name = "", aliases = c("a","b")), "character")
-  expect_type(columnSharedSlotsValidity(name = NA_character_, aliases = c("a","b")), "character")
-  expect_type(columnSharedSlotsValidity(name = c("a", "b"), aliases = c("a","b")), "character")
-  expect_type(columnSharedSlotsValidity(name = "n", aliases = c(NA_character_,"b")), "character")
-  expect_type(columnSharedSlotsValidity(name = "n", aliases = c("","b")), "character")
-
-  # Finally, some tests of things that should be allowed: One name and zero or more aliases:
-  expect_true(columnSharedSlotsValidity(name = "n", aliases = c("a","b")))
-  expect_true(columnSharedSlotsValidity(name = "n", aliases = "a"))
-  expect_true(columnSharedSlotsValidity(name = "n", aliases = character(0)))
-})
+# In order to do this, we test our expectations on the validity of the slots specific to each
+# subclass -- the shared ones are handled by the validity of Dealiasable, which is tested elsewhere.
+# Further, since creation of the objects has been tested, we know the validity does return TRUE for
+# the cases we expect it to, so we only need to test that it correctly throws an error when we expect it to.
 
 # A MunicipalitiesColumn object has no extra slots, so we don't need to test any cases where we expect errors.
 #test_that("Validation of MunicipalitiesColumn objects works", {
