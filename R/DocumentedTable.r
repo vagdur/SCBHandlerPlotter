@@ -93,89 +93,143 @@ setMethod("dealias","Level", function(x, toDealias) {
 })
 
 ####################################################################################
-# Definition of the Column class:
+# Definition of the Column class, from which CharacterColumn, NumericColumn, and
+# MunicipalitiesColumn inherit.
 
-# Create the class:
+# Create the base class, which just contains the name and aliases of a Column but has no type.
+# Note that this is a virtual class -- there can be no objects solely of class Column, only of
+# the three classes that inherit from it.
 setClass("Column",
+         contains = "VIRTUAL",
          slots = c(
            name = "character",
-           aliases = "character",
-           colLevels = "list",
-           levelsType = "character",
-           maxLevel = "numeric",
-           minLevel = "numeric"
+           aliases = "character"
          ),
          prototype = c(
            name = NA_character_,
-           aliases = NA_character_,
-           colLevels = list(),        # This is named colLevels instead of just levels because "levels" is reserved by the language.
-           levelsType = NA_character_,
-           maxLevel = NA_real_,
-           minLevel = NA_real_
+           aliases = character(0)
          ))
+# There is no constructor of pure Column objects, since such don't exist. Instead, the Column() function
+# figures out from its arguments which type of column you want. Thus, we define it after we define the subclasses.
 
-# Define a constructor:
-# Note that this code does absolutely no checking of object validity. That is
-# done by the validator, which is called automatically by new()
-Column <- function(name, aliases=NA_character_, levelsType, colLevels=list(), maxLevel=NA_real_, minLevel=NA_real_) {
-  new("Column", name=name, aliases=aliases, levelsType=levelsType, colLevels=colLevels, maxLevel=maxLevel, minLevel=minLevel)
+# For each subclass we define it, a validity function, and a very barebones constructor.
+# First, however, in the principle of DRY, a validity for the shared slots, which each validity
+# function can call:
+columnSharedSlotsValidity <- function(name, aliases) {
+  # We have two requirements:
+  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
+  #   2. That aliases not contain any NA or empty strings
+  if (length(name) != 1) {
+    return("The length of name must be exactly one.")
+  }
+  if (is.na(name) || name == "") {
+    return("name must not be NA or empty string.")
+  }
+  if (length(aliases) > 0) {
+    if (any(is.na(aliases) || aliases == "")) {
+      return("aliases must not contain NA or empty string.")
+    }
+  }
+  return(TRUE)
 }
-# This wants to know the name and aliases of the column to be created,
-# and either a list of Level objects, a pair of numbers, or NA, depending on the levelsType.
-# levelsType should be one of "Municipalities", "NumericRange", or "Character", just as in
-# the documentation format.
-setValidity("Column", function(object) {
-  # It should have exactly one name and one levelsType:
-  if (length(object@name) != 1) {
-    return("Name of column should be a single string, not a vector")
-  }
-  if (length(object@levelsType) != 1) {
-    return("levelsType of column should be a single string, not a vector")
-  } else if (!(object@levelsType %in% c("Municipalities", "NumericRange", "Character"))) {
-    return("levelsType of column must be one of Municipalities, NumericRange, or Character.")
+
+# A CharacterColumn additionally contains a list of its levels:
+setClass("CharacterColumn",
+         contains = "Column", # This is the R syntax for making the class inherit from Column, so it will contain all
+                              # the same slots and method calls dispatch upwards to Column if they aren't implemented for
+                              # CharacterColumn.
+         slots = c(colLevels = "list"), # This is named colLevels instead of just levels because "levels" is reserved by the language.
+         prototype = c(colLevels = list())
+         )
+setValidity("CharacterColumn", function(object) {
+  # First we check the slots that are shared by all Column subclasses:
+  sharedValidity <- columnSharedSlotsValidity(object@name, object@aliases)
+  if (is.character(sharedValidity)) { # If it returns a character, then that character is an error message we just pass on
+    return(sharedValidity)
   }
 
-  if (object@levelsType != "Character") {
-    # Only a column with levelsType Character is permitted to have its "colLevels" be not-NA.
-    # If a "colLevels" was nonetheless supplied, we ignore it with a warning:
-    if (!(length(object@colLevels) == 0)) {
-      warning('A "colLevels" was set in Column despite levelsType not being "Character". This will be ignored.')
-    }
+  # Second, we check that the colLevels slot has length greater than zero and each element is a valid Level object:
+  if (length(object@colLevels) == 0) {
+    return("A CharacterColumn object needs to have at least one level defined.")
   }
-  if (object@levelsType != "NumericRange") {
-    # Only a column with levelsType NumericRange is permitted to have maxLevel or minLevel set.
-    # If either is nevertheless supplied, we ignore it with a warning:
-    if (!is.na(object@maxLevel)||!is.na(object@minLevel)) {
-      warning("A maxLevel or minLevel was set in Column despite levelsType not being NumericRange. This will be ignored.")
-    }
-  }
-
-  # The preceding checks are actually enough for non-Character columns. For Character columns, we need
-  # some more checks:
-  if (object@levelsType=="Character") {
-    if (length(object@colLevels) == 0) {
-      # A column of levelsType character needs to have colLevels specified:
-      return("A Column of levelsType Character needs to have colLevels specified.")
-    }
-    # Next, we check that each object in colLevels really is a level, and is furthermore
-    # a valid object of that class:
-    for (level in object@colLevels) {
-      if (!("Level" %in% is(level))) {
-        #NOTE: !("Level" %in% is(level)) permits objects that inherit from Level. The opposite order,
-        # !(is(level)=="Level") is a subtle bug -- as soon as "level" is an object of more than one class,
-        # e.g. a vector of numbers, this condition actually becomes a vector checking if each class "level" is
-        # is "Level". So this causes an unexpected warning, the same as you get if(c(TRUE,FALSE)).
-        # This was a major headache to figure out, so be careful if changing it.
-        return("List of colLevels should consist of Level objects")
+  # Some very nested code here, but not too horrible, I don't think:
+  if (any(!(sapply(object@colLevels, function(x) {
+      if ("Level" %in% is(x)) {
+        validObject(x)
+      } else {
+        FALSE
       }
-      validObject(level)
-    }
+    })))) {
+    return("At least one of the colLevels is not an object of type Level.")
   }
-  # If everything worked, we return TRUE:
   return(TRUE)
 })
+CharacterColumn <- function(name, aliases=character(0), colLevels) {
+  new("CharacterColumn", name = name, aliases = aliases, colLevels = colLevels)
+}
 
-# Define setters and getters for all slots of the Column class: (This entire part is a *huge* DRY violation, but that's just R, I guess?)
+# A NumericColumn may additionally contain information on a maxLevel or minLevel:
+setClass("NumericColumn",
+         contains = "Column",
+         slots = c(maxLevel = "numeric",
+                   minLevel = "numeric"),
+         prototype = c(maxLevel = numeric(0),
+                       minLevel = numeric(0)))
+setValidity("NumericColumn", function(object) {
+  # Again, we start by checking the shared slots:
+  sharedValidity <- columnSharedSlotsValidity(object@name, object@aliases)
+  if (is.character(sharedValidity)) { # If it returns a character, then that character is an error message we just pass on
+    return(sharedValidity)
+  }
+  # The only thing we need to check here is that either maxLevel is omitted, or it is of length 1, and the same for minLevel:
+  if (length(object@maxLevel) > 1) {
+    return("maxLevel should either be omitted (of length 0) or of length 1.")
+  }
+  if (length(object@minLevel) > 1) {
+    return("minLevel should either be omitted (of length 0) or of length 1.")
+  }
+  return(TRUE)
+})
+NumericColumn <- function(name, aliases=character(0), minLevel = numeric(0), maxLevel = numeric(0)) {
+  new("NumericColumn", name = name, aliases = aliases, minLevel = minLevel, maxLevel = maxLevel)
+}
+
+# A MunicipalitiesColumn doesn't need to contain any other information than that it is
+# indeed a column of municipalities:
+setClass("MunicipalitiesColumn",
+         contains = "Column")
+setValidity("MunicipalitiesColumn", function(object) {
+  # Since a MunicipalitiesColumn has no extra slots compared to a Column, all we need to do is
+  # check the shared slots:
+  return(columnSharedSlotsValidity(object@name, object@aliases))
+})
+MunicipalitiesColumn <- function(name, aliases=character(0)) {
+  new("MunicipalitiesColumn", name = name, aliases = aliases)
+}
+
+
+# Having defined all three subclasses, we now define a "constructor" for the superclass, which actually just takes
+# an argument for which type of Column object to create: (This is in order to be compatible with code written for
+# the previous version, where there was just one class containing a flag for type and lots of conditionals.)
+Column <- function(levelsType,
+                   name,
+                   aliases=character(0),
+                   colLevels=list(),
+                   maxLevel=numeric(0),
+                   minLevel=numeric(0)) {
+  # What we need to do is just pass the arguments onwards to the right constructor:
+  if (levelsType == "NumericRange") {
+    return(NumericColumn(name = name, aliases = aliases, maxLevel = maxLevel, minLevel = minLevel))
+  } else if (levelsType == "Character") {
+    return(CharacterColumn(name = name, aliases = aliases, colLevels = colLevels))
+  } else if (levelsType == "Municipalities") {
+    return(MunicipalitiesColumn(name = name, aliases = aliases))
+  } else {
+    stop("You supplied an invalid argument for levelsType -- it should be one of 'NumericRange', 'Character', or 'Municipalities'.")
+  }
+}
+
+# Define setters and getters for the slots of the Column class:
 setMethod("name","Column", function(x) x@name)
 setMethod("name<-", "Column", function(x,value) {
   x@name <- value
@@ -189,19 +243,11 @@ setMethod("aliases<-","Column", function(x, value) {
   x
 })
 
-setGeneric("levelsType", function(x) standardGeneric("levelsType"))
-setGeneric("levelsType<-", function(x, value) standardGeneric("levelsType<-"))
-setMethod("levelsType","Column", function(x) x@levelsType)
-setMethod("levelsType<-","Column", function(x, value) {
-  x@levelsType <- value
-  validObject(x)
-  x
-})
-
+# Now, let us define setters and getters of the slots of the subclasses:
 setGeneric("colLevels", function(x) standardGeneric("colLevels"))
 setGeneric("colLevels<-", function(x, value) standardGeneric("colLevels<-"))
-setMethod("colLevels","Column", function(x) x@colLevels)
-setMethod("colLevels<-","Column", function(x, value) {
+setMethod("colLevels","CharacterColumn", function(x) x@colLevels)
+setMethod("colLevels<-","CharacterColumn", function(x, value) {
   x@colLevels <- value
   validObject(x)
   x
@@ -209,8 +255,8 @@ setMethod("colLevels<-","Column", function(x, value) {
 
 setGeneric("minLevel", function(x) standardGeneric("minLevel"))
 setGeneric("minLevel<-", function(x, value) standardGeneric("minLevel<-"))
-setMethod("minLevel","Column", function(x) x@minLevel)
-setMethod("minLevel<-","Column", function(x, value) {
+setMethod("minLevel","NumericColumn", function(x) x@minLevel)
+setMethod("minLevel<-","NumericColumn", function(x, value) {
   x@minLevel <- value
   validObject(x)
   x
@@ -218,8 +264,8 @@ setMethod("minLevel<-","Column", function(x, value) {
 
 setGeneric("maxLevel", function(x) standardGeneric("maxLevel"))
 setGeneric("maxLevel<-", function(x, value) standardGeneric("maxLevel<-"))
-setMethod("maxLevel","Column", function(x) x@maxLevel)
-setMethod("maxLevel<-","Column", function(x, value) {
+setMethod("maxLevel","NumericColumn", function(x) x@maxLevel)
+setMethod("maxLevel<-","NumericColumn", function(x, value) {
   x@maxLevel <- value
   validObject(x)
   x
@@ -227,15 +273,12 @@ setMethod("maxLevel<-","Column", function(x, value) {
 
 # Finally, we define both a dealias and a levelDealias method for a Column. "dealias" works
 # precisely as for a Level -- it looks at the name and aliases of the column, and sends any
-# input that matches the name or the aliases to the name, and any other input to NULL.
-# levelDealias runs its input against the dealias methods of the levels of the column, trying
-# to find if any succeed in dealiasing the input. If any did, it returns that success, otherwise
-# it returns NULL. If multiple succeed, it throws an error. (This should be prevented by the data
-# documentation validation if the column was constructed from XML documentation, however.)
-# levelDealias also works for NumericRange or Municipality columns, where it just checks that the
-# input has a valid value and then returns either the input or NULL depending on if it was valid
-# or not.
-# Both functions are of course vectorised.
+# input that matches the name or the aliases to the name, and any other input to NULL. This
+# can of course be defined at the level of the Column class, since it works the same for any
+# column, only involving the name and aliases slots.
+#
+# For levelDealias, we need to define one method per subclass, to handle the different cases.
+# (Still, this is prettier than the old awful nested conditional.)
 setMethod("dealias", "Column", function(x, toDealias) {
   # We can actually reuse the code for dealiasing in a Level verbatim.
   # Normally this might be cause to consider having both inherit from some shared
@@ -253,62 +296,64 @@ setMethod("dealias", "Column", function(x, toDealias) {
 })
 
 setGeneric("levelDealias", function(x,toDealias) standardGeneric("levelDealias"))
-setMethod("levelDealias", "Column", function(x, toDealias) {
-  # Again, we use a sapply with a unname(unlist()) wrapped around it, because that makes
-  # everything except that part much easier to read.
+setMethod("levelDealias", "NumericColumn", function(x, toDealias) {
   return(unname(unlist(sapply(toDealias, function(str) {
-    # We actually want to do slightly different things depending on the levelsType here.
-    # If it is of type Municipality, we return str if str is a municipality name, otherwise NULL:
-    if (x@levelsType == "Municipalities") {
-      if (str %in% municipalityNames) {
-        str
-      } else {
-        NULL
-      }
-    } else if (x@levelsType == "NumericRange") {
-      # If it is of type NumericRange, we return NULL if str is not a number. If it is a number, and maxLevel
-      # or minLevel is set, we check if str is in the right range. If it is, we return it, otherwise NULL.
-      if (!is.numeric(str)) {
-        NULL
-      } else {
-        if (!is.na(x@maxLevel) && str > x@maxLevel) {
-          NULL
-        } else if (!is.na(x@minLevel) && str < x@minLevel) {
-          NULL
-        } else {
-          str
-        }
-      }
-    } else if (x@levelsType == "Character") {
-      # If it is of type Character, we try to dealias str against every level, and check that this succeeds either
-      # zero times (in which case we return NULL) or once (in which case we return the successful value). If it succeeds
-      # more than once, we throw an error, since there is no unambiguous thing to dealias to.
-
-      dealiasingResults <- unname(unlist(sapply(x@colLevels, function(lev) {
-        dealias(lev, str)
-      })))
-      if (is.null(dealiasingResults)) {
-        # So none of the levels could dealias it, so we return NULL:
-        NULL
-      } else if (length(dealiasingResults) == 1) {
-        # WARNING: For some reason, if we return dealiasingResults, it pops out as an n x 1 matrix, but inside the actual function,
-        # it is as expected just a vector. This is very surprising, but borne out by inserting a browser() right after the sapply.
-        # I wonder why R does that to the return value?
-        dealiasingResults[1]
-      } else if (length(dealiasingResults) > 1) {
-        # More than one level succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
-        # that has been tested, this is impossible. We throw an error.
-        stop("More than one level succeeded in dealiasing. Are you sure your column has been constructed correctly?")
-      } else { # nocov start
-        # This really should not be possible. Since there should be no way to reach this point, we throw an error here
-        # to be alerted if our assumptions that this is unreachable are violated. Because this should be unreachable,
-        # there should be no way to write a test that covers this case, and thus we exclude it from our measurement
-        # of test coverage.
-        stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
-      } # nocov end
+    # What we need to check is two things -- that our input is numeric (if not,
+    # we return NULL) and that it falls between minLevel and maxLevel if those have
+    # been set.
+    if (!is.numeric(str)) {
+      NULL
     } else {
-      # This should be impossible -- levelsType has to be one of those three values
-      stop("Column has invalid levelsType.")
+      if (length(x@maxLevel) == 1 && str > x@maxLevel) {
+        NULL
+      } else if (length(x@minLevel) == 1 && str < x@minLevel) {
+        NULL
+      } else {
+        str
+      }
+    }
+  }))))
+})
+
+setMethod("levelDealias", "CharacterColumn", function(x, toDealias) {
+  return(unname(unlist(sapply(toDealias, function(str) {
+    # Here, we try to dealias str against every level, and check that this succeeds either
+    # zero times (in which case we return NULL) or once (in which case we return the successful value). If it succeeds
+    # more than once, we throw an error, since there is no unambiguous thing to dealias to.
+
+    dealiasingResults <- unname(unlist(sapply(x@colLevels, function(lev) {
+      dealias(lev, str)
+    })))
+    if (is.null(dealiasingResults)) {
+      # So none of the levels could dealias it, so we return NULL:
+      NULL
+    } else if (length(dealiasingResults) == 1) {
+      # Note: For some reason, if we return dealiasingResults, it pops out as an n x 1 matrix, but inside the actual function,
+      # it is as expected just a vector. This is very surprising, but borne out by inserting a browser() right after the sapply.
+      # I wonder why R does that to the return value?
+      dealiasingResults[1]
+    } else if (length(dealiasingResults) > 1) {
+      # More than one level succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
+      # that has been tested, this is impossible. We throw an error.
+      stop("More than one level succeeded in dealiasing. Are you sure your column has been constructed correctly?")
+    } else { # nocov start
+      # This really should not be possible. Since there should be no way to reach this point, we throw an error here
+      # to be alerted if our assumptions that this is unreachable are violated. Because this should be unreachable,
+      # there should be no way to write a test that covers this case, and thus we exclude it from our measurement
+      # of test coverage.
+      stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
+    } # nocov end
+  }))))
+})
+
+setMethod("levelDealias", "MunicipalitiesColumn", function(x, toDealias) {
+  return(unname(unlist(sapply(toDealias, function(str) {
+    # Here, the check we need to do is very simple: If the thing we got is the
+    # name of a municipality, we return that, otherwise, we return NULL.
+    if (str %in% municipalityNames) {
+      str
+    } else {
+      NULL
     }
   }))))
 })
