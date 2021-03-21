@@ -16,7 +16,7 @@ despite these data points being in different tables.
 
 Additionally, it provides code for creating interactive map plots of data on Swedish municipalities, using the ggiraph package. Try running
 
-    exampleForestPlot()
+    girage(ggobj = exampleForestPlot())
 to see this in action.
 
 ## Setup
