@@ -1,4 +1,40 @@
 ################################################################################
+# Test of the validity of the Dealiasable class. Since this is a virtual class,
+# it is a little bit suspect to be testing anything about it at all, but we do
+# have some shared expectations on the behaviour of the name and aliases field
+# across classes, so I think it makes sense to test them in common here.
+# If we expected to at some point want name and aliases to work differently for
+# different classes -- i.e. having a class implement its own validity checking
+# for name and aliases -- then this would be a bad idea, but that seems very
+# unlikely to happen.
+
+test_that("Validity of Dealiasable works", {
+  # We have two requirements:
+  #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
+  #   2. That aliases not contain any NA or empty strings
+  # The function will return a character containing an error message if any of the requirements are violated,
+  # so the way to test this is to expect type character.
+  # Note that we don't expect this function to be testing the types of its inputs, since that is already done
+  # by the underlying S4 system.
+
+  # Since Dealiasable is a virtual class, we need to define a class that inherits from it in order to test
+  # its validity:
+  setClass("TestClass", contains="Dealiasable")
+
+  expect_snapshot_error(new("TestClass", name = character(0), aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = "", aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = NA_character_, aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = c("a", "b"), aliases = c("a","b")))
+  expect_snapshot_error(new("TestClass", name = "n", aliases = c(NA_character_,"b")))
+  expect_snapshot_error(new("TestClass", name = "n", aliases = c("","b")))
+
+  # Finally, some tests of things that should be allowed: One name and zero or more aliases:
+  expect_silent(new("TestClass", name = "n", aliases = c("a","b")))
+  expect_silent(new("TestClass", name = "n", aliases = "a"))
+  expect_silent(new("TestClass", name = "n", aliases = character(0)))
+})
+
+################################################################################
 # Tests of the Level class:
 test_that("Level objects can be created manually", {
   tl <- new("Level", name = "Test", aliases = c("test","tset"))
@@ -35,64 +71,97 @@ test_that("Dealiasing of levels works", {
 })
 
 ##############################################################################
-# Tests of the Column class:
-test_that("Column objects of levelsType Municipalities can be created manually",{
-  tc <- new("Column", name="region", aliases=c("Kommun", "Municipality"), levelsType="Municipalities")
-  expect_s4_class(tc, "Column")
+# Tests of the Column classes:
+
+# First we test that objects of these classes can be created:
+
+test_that("MunicipalitiesColumn objects can be created manually",{
+  tc <- new("MunicipalitiesColumn", name="region", aliases=c("Kommun", "Municipality"))
+  expect_s4_class(tc, "MunicipalitiesColumn")
 })
-test_that("Column objects of levelsType Municipalities can be created by constructor",{
-  tc <- Column(name="region", aliases=c("Kommun", "Municipality"), levelsType="Municipalities")
-  expect_s4_class(tc, "Column")
+test_that("MunicipalitiesColumn objects can be created by constructor",{
+  # Here, we test both the barebones constructor specific to the subclass and the general constructor
+  # for all three subclasses.
+  tc1 <- Column(name="region", aliases=c("Kommun", "Municipality"), levelsType="Municipalities")
+  expect_s4_class(tc1, "MunicipalitiesColumn")
+  tc2 <- MunicipalitiesColumn(name="region", aliases=c("Kommun", "Municipality"))
+  expect_s4_class(tc2, "MunicipalitiesColumn")
 })
 
-test_that("Column objects of levelsType NumericRange can be created manually", {
-  tc1 <- new("Column", name="alder", aliases=c("Age","age"), levelsType="NumericRange")
-  tc2 <- new("Column", name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=23)
-  tc3 <- new("Column", name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=45, minLevel=23)
-  expect_s4_class(tc1, "Column")
-  expect_s4_class(tc2, "Column")
-  expect_s4_class(tc3, "Column")
+test_that("NumericColumn objects can be created manually", {
+  tc1 <- new("NumericColumn", name="alder", aliases=c("Age","age"))
+  tc2 <- new("NumericColumn", name="alder", aliases=c("Age","age"), maxLevel=23)
+  tc3 <- new("NumericColumn", name="alder", aliases=c("Age","age"), maxLevel=45, minLevel=23)
+  expect_s4_class(tc1, "NumericColumn")
+  expect_s4_class(tc2, "NumericColumn")
+  expect_s4_class(tc3, "NumericColumn")
 })
-test_that("Column objects of levelsType NumericRange can be created by constructor", {
+test_that("NumericColumn objects can be created by constructor", {
   tc1 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange")
   tc2 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=23)
   tc3 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=45, minLevel=23)
-  expect_s4_class(tc1, "Column")
-  expect_s4_class(tc2, "Column")
-  expect_s4_class(tc3, "Column")
+  expect_s4_class(tc1, "NumericColumn")
+  expect_s4_class(tc2, "NumericColumn")
+  expect_s4_class(tc3, "NumericColumn")
+  tc4 <- NumericColumn(name="alder", aliases=c("Age","age"))
+  tc5 <- NumericColumn(name="alder", aliases=c("Age","age"), maxLevel=23)
+  tc6 <- NumericColumn(name="alder", aliases=c("Age","age"), maxLevel=45, minLevel=23)
+  expect_s4_class(tc4, "NumericColumn")
+  expect_s4_class(tc5, "NumericColumn")
+  expect_s4_class(tc6, "NumericColumn")
 })
 
-test_that("Column objects of levelsType Character can be created manually", {
+test_that("CharacterColumn objects can be created manually", {
   tl <- Level("Test", c("Test","test","tset"))
   tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
-  tc <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
-  expect_s4_class(tc,"Column")
+  tc <- new("CharacterColumn", name="Tests", aliases=c("test","testa"), colLevels=list(tl,tl2))
+  expect_s4_class(tc,"CharacterColumn")
 })
-test_that("Column objects of levelsType Character can be created by constructor", {
+test_that("CharacterColumn objects can be created by constructor", {
   tl <- Level("Test", c("Test","test","tset"))
   tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
-  tc <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
-  expect_s4_class(tc,"Column")
+
+  tc1 <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
+  expect_s4_class(tc1,"CharacterColumn")
+  tc2 <- CharacterColumn(name="Tests", aliases=c("test","testa"), colLevels=list(tl,tl2))
+  expect_s4_class(tc2,"CharacterColumn")
 })
 
-test_that("Validation of Column objects works", {
-  # Some argument is required:
-  expect_error(Column())
-  # Name should be a single string, not many:
-  expect_error(Column(name=c("One","Two"),aliases="na",levelsType = "Municipalities"))
-  # levelsType should be a single string, not many:
-  expect_error(Column(name="n",aliases="na",levelsType = c("One","Two")))
-  # levelsType should be one of NumericRange, Municipalities, or Character:
-  expect_error(Column(name="n", levelsType="Hiya!"))
+test_that("Column constructor can only create column objects from one of the three subclasses", {
+  expect_error(Column(name="t", levelsType="Invalid type of column"))
+})
 
-  # Supplying a maxLevel or minLevel to a Column where the levelsType is not NumericRange should cause a warning:
-  expect_warning(Column(name="", aliases="", levelsType = "Municipalities", maxLevel = 35))
-  # Supplying a colLevels to a column that does not have levelsType Character should cause a warning:
-  expect_warning(Column(name="", levelsType = "NumericRange", colLevels = list(1,2,3)))
+# Then, we test that the validation of the values of the slots works as expected, that is,
+# that we get an error if we try to create an object whose slots contains things we think
+# it should not be able to contain.
+#
+# In order to do this, we test our expectations on the validity of the slots specific to each
+# subclass -- the shared ones are handled by the validity of Dealiasable, which is tested elsewhere.
+# Further, since creation of the objects has been tested, we know the validity does return TRUE for
+# the cases we expect it to, so we only need to test that it correctly throws an error when we expect it to.
 
-  # Supplying a colLevels that is not a list of valid level objects, or no colLevels at all, should cause an error:
-  expect_error(Column(name="", levelsType = "Character"))
-  expect_error(Column(name="", levelsType = "Character", colLevels = list(1,2,3)))
+# A MunicipalitiesColumn object has no extra slots, so we don't need to test any cases where we expect errors.
+#test_that("Validation of MunicipalitiesColumn objects works", {
+#
+#})
+
+test_that("Validation of NumericColumn objects works", {
+  # Here, we have two new slots -- minLevel and maxLevel -- and we expect them to be of type numeric,
+  # and of length either zero or one. Passing these arguments is optional.
+  expect_error(NumericColumn(name="n", minLevel = "b"))
+  expect_error(NumericColumn(name="n", maxLevel = "b"))
+  expect_error(NumericColumn(name="n", minLevel = c(1,2)))
+  expect_error(NumericColumn(name="n", maxLevel = c(1,2)))
+  expect_silent(NumericColumn(name="n"))
+})
+
+test_that("Validation of CharacterColumn objects works", {
+  # Here, we have one new slot -- colLevels -- which we expect to be a list containing one or more
+  # valid Levels objects. Passing this argument is not optional.
+  expect_error(CharacterColumn(name="n"))
+  expect_error(CharacterColumn(name="n", colLevels = "a"))
+  expect_error(CharacterColumn(name="n", colLevels = list(1,2,3)))
+
   # Even if one of the levels is valid, we should fail if there is an invalid object:
   tl <- Level("Test", c("Test","test","tset"))
   tl_invalid <- Level("Test", c("Test","test","tset"))
@@ -102,49 +171,56 @@ test_that("Validation of Column objects works", {
   expect_error(Column(name="", levelsType = "Character", colLevels = list(tl, tl_invalid)))
 })
 
-test_that("Setters and getters of Column object slots works", {
-  tc1 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange")
-  tc2 <- Column(name="alder", aliases=c("Age","age"), levelsType="NumericRange", maxLevel=23)
+# Having tested the validity functions, we now test the setters and getters: (Note that we do not test that
+# the setters throw errors if we try to set an invalid value. Perhaps worth doing, but breaking that coupling to
+# the validities seems so exceedingly unlikely...)
 
+test_that("Setters and getters of shared Column slots work", {
+  # For simplicity, we test this on a MunicipalitiesColumn, since that subclass has no slots of its own that
+  # we need to specify:
+  tc <- MunicipalitiesColumn(name = "name", aliases = c("alias1","alias2"))
+
+  expect_identical(name(tc), "name")
+  name(tc) <- "Column name"
+  expect_identical(name(tc), "Column name")
+
+  expect_identical(aliases(tc), c("alias1","alias2"))
+  aliases(tc) <- c("a", "b")
+  expect_identical(aliases(tc), c("a", "b"))
+})
+
+test_that("Setters and getters of NumericColumn slots work", {
+  # We have two extra slots to test: maxLevel and minLevel
+  tc <- NumericColumn(name = "n", minLevel = 10, maxLevel = 20)
+  expect_equal(maxLevel(tc), 20)
+  maxLevel(tc) <- 25
+  expect_equal(maxLevel(tc), 25)
+  expect_equal(minLevel(tc), 10)
+  minLevel(tc) <- 15
+  expect_equal(minLevel(tc), 15)
+})
+
+test_that("Setters and getters of CharacterColumn slots work", {
+  # Here, we have just one extra slot: colLevels
   tl1 <- Level("Test", c("Test","test","tset"))
   tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
-  tc3 <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
-
-  expect_identical(name(tc1),"alder")
-  name(tc1) <- "NewName"
-  expect_identical(name(tc1),"NewName")
-  expect_error(name(tc1) <- c("Two", "Names"))
-
-  expect_identical(aliases(tc1), c("Age","age"))
-  aliases(tc1) <- c("New","Aliases")
-  expect_identical(aliases(tc1),c("New","Aliases"))
-  expect_error(aliases(tc1) <- c(1,2,3))
-
-  expect_identical(levelsType(tc1), "NumericRange")
-  levelsType(tc1) <- "Municipalities"
-  expect_identical(levelsType(tc1), "Municipalities")
-  expect_error(levelsType(tc1) <- "An invalid levelsType")
-
-  expect_identical(maxLevel(tc2),23)
-  maxLevel(tc2) <- 56
-  expect_identical(maxLevel(tc2), 56)
-  expect_error(maxLevel(tc2) <- "Not a number")
-
-  expect_true(is.na(minLevel(tc2)))
-  minLevel(tc2) <- 12
-  expect_identical(minLevel(tc2), 12)
-  expect_error(minLevel(tc2) <- "Not a number")
-
-  expect_identical(colLevels(tc3), list(tl1, tl2))
-  colLevels(tc3) <- list(tl1)
-  expect_identical(colLevels(tc3), list(tl1))
-  expect_error(colLevels(tc3) <- list(1,2,3))
+  tc <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
+  expect_identical(colLevels(tc), list(tl1, tl2))
+  colLevels(tc) <- list(tl1)
+  expect_identical(colLevels(tc), list(tl1))
 })
+
+# MunicipalitiesColumn currently has no slots of its own, only ones it inherits, so there's nothing to test here:
+#test_that("Setters and getters of MunicipalitiesColumn slots work", {
+#
+#})
+
+# Finally, we test dealiasing both of the column itself and of its levels:
 
 test_that("Dealiasing of columns works", {
   tl <- Level("Test", c("Test","test","tset"))
   tl2 <- Level(name = "Test", aliases = c("Test","test","tset"))
-  tc <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
+  tc <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl,tl2))
   expect_identical(dealias(tc, "Tests"),"Tests")
   expect_identical(dealias(tc, c("test","testa","Tests","Not one of the aliases")),c("Tests","Tests","Tests"))
   expect_true(is.null(dealias(tc,"Not one of the aliases")))
@@ -180,19 +256,16 @@ test_that("levelDealias works for columns", {
   # This is really the main case where we need this.
   tl1 <- Level(name = "Test1", aliases = c("test1","test_1","tset1"))
   tl2 <- Level(name = "Test2", aliases = c("test2","test_2","tset2"))
-  tc_char <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
+  tc_char <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2))
   expect_identical(levelDealias(tc_char, "test_1"), "Test1")
   expect_true(is.null(levelDealias(tc_char, "Not an alias in the levels")))
   expect_identical(levelDealias(tc_char, c("test1","tset2","Not in the data","Test1","Test2")),
                                          c("Test1","Test2","Test1","Test2"))
+
   # If one column has more than one level succeed in dealiasing, we expect an error -- it means the alias isn't unambiguous.
   tl3 <- Level(name = "Test3", aliases = c("test3","test_3","tset2")) # note "tset2" instead of "tset3" here -- so an alias reoccurs in several levels.
-  tc_char_ambiguous <- new("Column", name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2,tl3))
+  tc_char_ambiguous <- Column(name="Tests", aliases=c("test","testa"), levelsType="Character", colLevels=list(tl1,tl2,tl3))
   expect_error(levelDealias(tc_char_ambiguous, "tset2"))
-
-  # We also make sure that a column whose levelsType is invalid (so the object itself is invalid) always fails in dealiasing levels:
-  tc_char@levelsType <- "An invalid levelsType"
-  expect_error(levelDealias(tc_char, "test1"))
 })
 
 ##########################################################################################################################################################
