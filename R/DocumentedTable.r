@@ -52,14 +52,21 @@ setValidity("Dealiasable", function(object) {
   # We have two requirements:
   #   1. That name be a single value, not a vector, and that value not be NA or the empty string.
   #   2. That aliases not contain any NA or empty strings
+  isNAorEmptyString <- function(x) {
+    if (is.na(x))
+      return(TRUE)
+    if (x == "")
+      return(TRUE)
+    return(FALSE)
+  }
   if (length(object@name) != 1) {
     return("The length of name must be exactly one.")
   }
-  if (is.na(object@name) || object@name == "") {
+  if (isNAorEmptyString(object@name)) {
     return("name must not be NA or empty string.")
   }
   if (length(object@aliases) > 0) {
-    if (any(is.na(object@aliases) || object@aliases == "")) {
+    if (any(sapply(object@aliases, function(alias) isNAorEmptyString(alias)))) {
       return("aliases must not contain NA or empty string.")
     }
   }
