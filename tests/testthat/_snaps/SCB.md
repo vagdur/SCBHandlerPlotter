@@ -3,7 +3,7 @@
     Code
       SCB(Municipality = "Uppsala", Age = 24, Gender = "Women", MaritalStatus = "Divorced")
     Output
-      [1] 14
+      [1] 8
 
 ---
 
