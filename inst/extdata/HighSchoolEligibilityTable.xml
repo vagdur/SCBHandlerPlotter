@@ -2,16 +2,16 @@
 
 <table>
     <name>HighSchoolEligibility</name>
-    <filename>Skolverket_gymnasiebehorighet.csv</filename>
+    <filename>Skolverket_gymnasiebehorighet2.csv</filename>
     <title>High school eligibility</title>
-    <description>A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private).</description>
-    <source>Skolverket</source>
-    <year>2019</year>
+    <description>A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private). The original data reported total number of students and percentage ineligible for any high school program, thus the non-integer numbers of students. See the data source for more detail. Note that values less than ten for total number of students are rounded to zero, and if there are less than five ineligible students, the percentage of ineligible students was rounded to 0.</description>
+    <source>Skolverket: https://bit.ly/394Xtiz</source>
+    <year>School year 2018/2019</year>
 
     <columns>
         <column>
             <identifier>Municipality</identifier>
-            <colname>Kommun</colname>
+            <colname>Municipality</colname>
             <alias>Kommun</alias>
             <levels>
                 <levelsType>Municipalities</levelsType>
@@ -20,7 +20,7 @@
 
         <column>
             <identifier>Gender</identifier>
-            <colname>Kön</colname>
+            <colname>Gender</colname>
             <alias>Kön</alias>
             <levels>
                 <levelsType>Character</levelsType>
@@ -48,7 +48,7 @@
 
         <column>
             <identifier>SchoolOrganizer</identifier>
-            <colname>Huvudman</colname>
+            <colname>SchoolOrganiser</colname>
             <alias>Huvudman</alias>
             <levels>
                 <levelsType>Character</levelsType>
@@ -70,28 +70,33 @@
 
         <column>
             <identifier>HighSchoolEligibility</identifier>
-            <colname>Behörighet</colname>
+            <colname>Students</colname>
             <alias>HSEligibility</alias>
             <alias>Gymnasiebehörighet</alias>
             <levels>
                 <levelsType>Character</levelsType>
                 <level>
-                    <levelName>Gymnasiebehöriga</levelName>
+                    <levelName>Eligible</levelName>
+                    <alias>Gymnasiebehöriga</alias>
                     <alias>True</alias>
                     <alias>Behöriga</alias>
-                    <alias>Eligible</alias>
                 </level>
                 <level>
-                    <levelName>Gymnasieobehöriga</levelName>
+                    <levelName>Ineligible</levelName>
+                    <alias>Gymnasieobehöriga</alias>
                     <alias>False</alias>
                     <alias>Obehöriga</alias>
-                    <alias>Ineligible</alias>
+                </level>
+                <level>
+                    <levelName>Total</levelName>
+                    <alias>Samtliga</alias>
+                    <alias>All</alias>
                 </level>
             </levels>
         </column>
 
         <valueColumn>
-            <colname>Antal</colname>
+            <colname>value</colname>
         </valueColumn>
     </columns>
 </table>
