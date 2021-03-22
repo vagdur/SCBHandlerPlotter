@@ -24,7 +24,7 @@
     Code
       SCB(Municipality = "Lund", HighSchoolEligibility = "True")
     Output
-      [1] 641
+      [1] 5511.124
 
 # Parameter forceTable works as expected
 
