@@ -493,31 +493,43 @@ setMethod("valueColumn<-","DocumentedTable", function(x, value) {
 })
 
 # Define columnDealias:
-setGeneric("columnDealias", function(x, toDealias) standardGeneric("columnDealias"))
-setMethod("columnDealias", "DocumentedTable", function(x, toDealias) {
+setGeneric("columnDealias", function(x, toDealias, getColumn = FALSE) standardGeneric("columnDealias"))
+setMethod("columnDealias", "DocumentedTable", function(x, toDealias, getColumn = FALSE) {
   # As before, we use this slight hack to easily vectorise the function, and the rest of the code
   # can pretend like the arguments we got were x and str:
-  unname(unlist(sapply(toDealias, function(str) {
-    # This is essentially a copy-paste of the code for levelDealias -- perhaps another argument
-    # to try to code this with multiple-inheritance from a "dealiasable" class as well as the
-    # normal inheritance? Worth thinking about.
-
+  result <- lapply(toDealias, function(str) {
     # We try to dealias str against every column, and then see if it succeeded zero times (in
-    # which case we return NULL), once (in which case we return the value of that success), or
-    # more than once, in which case we throw an error since we couldn't find an unambiguous
-    # result but really should be able to if the table is set up right.
+    # which case we return NULL), once (in which case we return the value of that success, or
+    # the column that succeeded if getColumn is TRUE), or more than once, in which case we throw
+    # an error since we couldn't find an unambiguous result but really should be able to if the
+    # table is set up right.
 
-    dealiasingResults <- unname(unlist(sapply(x@tableColumns, function(col) {
-      dealias(col, str)
-    })))
-    if (is.null(dealiasingResults)) {
+    dealiasingResults <- lapply(x@tableColumns, function(col) {
+      dealiasResult <- dealias(col, str)
+      if (!getColumn) {
+        # If the user doesn't want the actual Column object, we just return the output of dealias
+        # in this lapply:
+        dealiasResult
+      } else {
+        # If the user wants the actual column, we check if the dealiasing succeeded, and if it did,
+        # we return the column itself in this lapply:
+        if (is.null(dealiasResult)) {
+          NULL
+        } else {
+          col
+        }
+      }
+    })
+
+    # Since the above was a lapply, we get a list with a bunch of NULLs in it. We remove those:
+    dealiasingResults <- dealiasingResults[-which(sapply(dealiasingResults, is.null))]
+
+    # Now, we check how many columns were able to dealias that name:
+    if (length(dealiasingResults) == 0) {
       # So none of the columns could dealias it, so we return NULL:
       NULL
     } else if (length(dealiasingResults) == 1) {
-      # WARNING: For some reason, if we return dealiasingResults, it pops out as an n x 1 matrix, but inside the actual function,
-      # it is as expected just a vector. This is very surprising, but borne out by inserting a browser() right after the sapply.
-      # I wonder why R does that to the return value?
-      dealiasingResults[1]
+      dealiasingResults[[1]]
     } else if (length(dealiasingResults) > 1) {
       # More than one column succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
       # that has been tested, this is impossible. We throw an error.
@@ -528,7 +540,15 @@ setMethod("columnDealias", "DocumentedTable", function(x, toDealias) {
       stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
       # Since this case should be completely impossible, so should writing a test that hits it. Thus we exclude it from test coverage stats.
     } # nocov end
-  })))
+  })
+
+  # If we want to return the actual Column objects, they need to be in a list,
+  # otherwise, the user wants a vector, and we give that to them:
+  if (getColumn) {
+    return(result)
+  } else {
+    return(unname(unlist(result)))
+  }
 })
 
 # Define canHandleQuery:
