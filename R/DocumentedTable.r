@@ -427,6 +427,13 @@ setValidity("DocumentedTable", function(object) {
   # Everything was okay, so we return TRUE:
   return(TRUE)
 })
+
+# It is useful for objects of this class to show compactly, instead of vomiting out the result of show() on each
+# of its slots:
+setMethod("show", "DocumentedTable", function(object) {
+  cat(paste("A DocumentedTable object named",name(object),"containing",length(tableColumns(object)),"columns."))
+})
+
 # Define setter and getter methods: (I hate how un-DRY this code is... Might be possible to just do this with some fancy meta-programming?)
 setGeneric("description", function(x) standardGeneric("description"))
 setGeneric("description<-", function(x, value) standardGeneric("description<-"))
