@@ -53,7 +53,7 @@ SCB <- function(verbose = FALSE, forceTable = NA_character_, failIfUnable = FALS
   if (!is.character(forceTable)) {
     stop("forceTable must be character.")
   }
-  if (!is.na(forceTable)) { # Note that we do not use missing() here, because vectorSCB needs to be able to pass NA explicitly to mark omission of the argument.
+  if (!missing(forceTable)) {
     # First, we check that the value of forceTable is actually the name of a table:
     if(!(forceTable %in% loadedTableNames)) {
       stop(paste(forceTable,"is not the name of a table."))

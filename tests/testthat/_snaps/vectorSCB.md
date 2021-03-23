@@ -38,6 +38,8 @@
 
     Code
       vectorSCB(vectorColumn = LandUseType, Municipality = "Ludvika", verbose = TRUE)
+    Message <simpleMessage>
+      Query matched table LandUse. Returning data from said table.
     Output
       bebyggd mark och tillhörande mark                         betesmark 
                                    4774                               226 

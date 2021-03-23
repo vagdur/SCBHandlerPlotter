@@ -4,14 +4,22 @@
 \alias{vectorSCB}
 \title{Vectorise a call to SCB}
 \usage{
-vectorSCB(vectorColumn, verbose = FALSE, forceTable = NA_character_, ...)
+vectorSCB(
+  vectorColumn,
+  verbose = FALSE,
+  forceTable = NA_character_,
+  failIfUnable = FALSE,
+  ...
+)
 }
 \arguments{
 \item{vectorColumn}{Which column should be vectorised over. This argument should not be quoted, just write it straight up. See examples.}
 
-\item{verbose}{Causes some extra messages to be printed explaining what is happening in the calls to downstream functions.}
+\item{verbose}{Causes some extra messages to be printed explaining what is happening. If you are getting unexpected results, try setting this to TRUE first.}
 
 \item{forceTable}{Directs the query to a specific table, in case your query does not uniquely determine a table.}
+
+\item{failIfUnable}{If the query cannot be handled by our tables, should we throw an error, or just a warning and return NA? TRUE gives errors, FALSE gives warnings.}
 
 \item{...}{Your query, see documentation of SCB() for syntax for this.}
 }
