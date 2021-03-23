@@ -454,13 +454,9 @@ test_that("Setters and getters of DocumentedTable work", {
   tableColumns(tdt) <- list(tcol_num, tcol_municip, tcol_char)
 
 
-  # Setters and getters of valueColumn are strange, since it always needs to be a column in the csvData. Perhaps there should only be a
-  # getter, not a setter? We test anyway, expecting errors:
+  # valueColumn only has a getter, the setter should throw an error saying it is not implemented.
   expect_identical(valueColumn(tdt),"valueColumn")
-  expect_error(valueColumn(tdt)<-"A new name") # The value column is checked against the csvData, so changing it should always give an error
-                                               # unless the csvData has been manually changed.
-  expect_error(name(tdt) <- c("valueColumn","valueColumn")) # Even if the value is correct wrt to csvData, there should still only be one.
-  #TODO: Remove setter of valueColumn, since it should almost always give an error.
+  expect_error(valueColumn(tdt)<-"A new name", "Setting of valueColumn slot is not implemented. Either assign to x@valueColumn if you really know what you are doing, or get it right the first time when constructing the table.")
 })
 
 # Next up, we test the columnDealias method:

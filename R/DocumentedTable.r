@@ -482,9 +482,7 @@ setGeneric("valueColumn", function(x) standardGeneric("valueColumn"))
 setGeneric("valueColumn<-", function(x, value) standardGeneric("valueColumn<-"))
 setMethod("valueColumn","DocumentedTable", function(x) x@valueColumn)
 setMethod("valueColumn<-","DocumentedTable", function(x, value) {
-  x@valueColumn <- value
-  validObject(x)
-  x
+  stop("Setting of valueColumn slot is not implemented. Either assign to x@valueColumn if you really know what you are doing, or get it right the first time when constructing the table.")
 })
 
 # Define columnDealias:
