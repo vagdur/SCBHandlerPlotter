@@ -19,7 +19,7 @@ createDocumentedTableFromXML <- function(pathToXML) {
   tableName <- xmlList$name[[1]][1]
   tableDescription <- xmlList$description[[1]][1]
   tableDataSource <- xmlList$source[[1]][1]
-  tableDataYear <- as.integer(xmlList$year[[1]][1])
+  tableDataYear <- xmlList$year[[1]][1]
 
   # We also read in the valueColumn specified by the XML, though that hides a few tags down:
   tableValueColumn <- xmlList$columns$valueColumn$colname[[1]][1]

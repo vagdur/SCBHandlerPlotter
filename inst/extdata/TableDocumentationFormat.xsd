@@ -7,7 +7,7 @@
         <xs:element name = 'title' type='xs:token' />
         <xs:element name = 'description' type='xs:string' />
         <xs:element name = 'source' type='xs:token' />
-        <xs:element name = 'year' type='xs:gYear' />
+        <xs:element name = 'year' type='xs:token' />
 
         <xs:element name = 'columns'><xs:complexType><xs:sequence>
             <xs:element name = 'column' type = 'ColumnType' minOccurs = '1' maxOccurs = 'unbounded' />

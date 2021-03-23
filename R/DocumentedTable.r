@@ -354,7 +354,7 @@ setClass("DocumentedTable",
          slots = c(
            description = "character",
            dataSource = "character",
-           dataYear = "numeric",
+           dataYear = "character",
            csvData = "data.frame",
            tableColumns = "list",
            valueColumn = "character"
@@ -362,7 +362,7 @@ setClass("DocumentedTable",
          prototype = c(
            description = NA_character_,
            dataSource = NA_character_,
-           dataYear = NA_real_,
+           dataYear = NA_character_,
            csvData = data.frame(),
            tableColumns = list(),
            valueColumn = NA_character_
@@ -375,6 +375,11 @@ DocumentedTable <- function(name = NA_character_,
                             csvData = data.frame(),
                             tableColumns = list(),
                             valueColumn = NA_character_) {
+  # We'll frequently, but not always, want data year as just a number for a year, so for convenience we permit passing numbers
+  # to the constructor too, and the constructor converts those to character:
+  if (is.numeric(dataYear)) {
+    dataYear <- as.character(dataYear)
+  }
   new("DocumentedTable", name = name, description = description, dataSource = dataSource,
       dataYear = dataYear, csvData = csvData, tableColumns = tableColumns, valueColumn = valueColumn)
 }
@@ -445,6 +450,11 @@ setGeneric("dataYear", function(x) standardGeneric("dataYear"))
 setGeneric("dataYear<-", function(x, value) standardGeneric("dataYear<-"))
 setMethod("dataYear","DocumentedTable", function(x) x@dataYear)
 setMethod("dataYear<-","DocumentedTable", function(x, value) {
+  # We'll frequently, but not always, want data year as just a number for a year, so for convenience we permit passing numbers
+  # to the setter too, and the setter converts those to character:
+  if (is.numeric(value)) {
+    value <- as.character(value)
+  }
   x@dataYear <- value
   validObject(x)
   x

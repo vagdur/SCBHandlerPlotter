@@ -274,14 +274,17 @@ test_that("levelDealias works for columns", {
 # First we test that new() and the constructor DocumentedTable both are able to create DocumentedTable objects:
 test_that("DocumentedTable object can be constructed manually", {
   tdt <- new("DocumentedTable", name = "name", description = "description", dataSource = "dataSource",
-             dataYear = 1312, csvData = data.frame(valueColumn=c(1,2,3)), tableColumns = list(), valueColumn = "valueColumn")
+             dataYear = "1312", csvData = data.frame(valueColumn=c(1,2,3)), tableColumns = list(), valueColumn = "valueColumn")
   expect_s4_class(tdt, "DocumentedTable")
 })
 
 test_that("DocumentedTable object can be created by constructor", {
   tdt <- DocumentedTable(name = "name", description = "description", dataSource = "dataSource",
-             dataYear = 1312, csvData = data.frame(valueColumn=c(1,2,3)), tableColumns = list(), valueColumn = "valueColumn")
+             dataYear = "1312", csvData = data.frame(valueColumn=c(1,2,3)), tableColumns = list(), valueColumn = "valueColumn")
   expect_s4_class(tdt, "DocumentedTable")
+  tdt2 <- DocumentedTable(name = "name", description = "description", dataSource = "dataSource",
+                         dataYear = 1312, csvData = data.frame(valueColumn=c(1,2,3)), tableColumns = list(), valueColumn = "valueColumn")
+  expect_s4_class(tdt2, "DocumentedTable")
 })
 
 # We create one DocumentedTable object to test on, since these can be somewhat complicated objects, so it makes sense to only do this once.
@@ -380,9 +383,9 @@ test_that("DocumentedTable validation works", {
   tdt@dataSource <- "dataSource"
   validObject(tdt)
 
-  tdt@dataYear <- c(1, 2)
+  tdt@dataYear <- c("1", "2")
   expect_error(validObject(tdt))
-  tdt@dataYear <- 1111
+  tdt@dataYear <- "1111"
   validObject(tdt)
 
   tdt@valueColumn <- c("Two", "Things")
@@ -416,9 +419,13 @@ test_that("Setters and getters of DocumentedTable work", {
   expect_identical(tdt@dataSource, "Something else")
   expect_error(dataSource(tdt) <- c("Two","Things"))
 
-  expect_identical(dataYear(tdt),1111)
+  # Data year should be stored internally as character:
+  expect_identical(dataYear(tdt),"1111")
+  # Setting, however, should be possible both with numbers and with strings:
   dataYear(tdt)<-1066 # Battle of Hastings!
-  expect_identical(tdt@dataYear, 1066)
+  expect_identical(tdt@dataYear, "1066")
+  dataYear(tdt)<-"Approx. 4 B.C." # Historians believe this is when Christ was born!
+  expect_identical(dataYear(tdt), "Approx. 4 B.C.")
   expect_error(name(tdt) <- c(1456, 1865))
 
   # In order to test the setter and getter of csvData, we obviously need to define our data frames, both
