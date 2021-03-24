@@ -461,7 +461,7 @@ test_that("Setters and getters of DocumentedTable work", {
 
 # Next up, we test the columnDealias method:
 test_that("columnDealias works", {
-  # First we test a few things against the correctly formatted table:
+  # First we test the default mode, returning the name, against the correctly formatted table:
   expect_identical(columnDealias(tdt, "MunicipalitiesColumn"), "municipalities_column")
   expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "municipalities_column")),
                    c("municipalities_column", "municipalities_column"))
@@ -470,6 +470,17 @@ test_that("columnDealias works", {
   expect_null(columnDealias(tdt, "another_column_name"))
   expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "misplaced_column_name", "municipalities_column")),
                    c("municipalities_column", "municipalities_column"))
+
+  # Then we test the mode where getColumn=TRUE, so we expect to get the column objects themselves back:
+  expect_identical(columnDealias(tdt, "MunicipalitiesColumn", getColumn = TRUE), list(tcol_municip))
+  expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "municipalities_column"), getColumn = TRUE),
+                   list(tcol_municip, tcol_municip))
+  expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "character.column"), getColumn = TRUE),
+                   list(tcol_municip, tcol_char))
+  expect_null(columnDealias(tdt, "another_column_name", getColumn = TRUE))
+  expect_identical(columnDealias(tdt, c("MunicipalitiesColumn", "misplaced_column_name", "municipalities_column"), getColumn = TRUE),
+                   list(tcol_municip, tcol_municip))
+
   # Then, we make sure that if two columns share an alias, we get an error trying to dealias that alias:
   aliases(tdt@tableColumns[[1]]) <- c("numericColumn", "NumericColumn", "numeric.column","municipalities_column")
   expect_error(columnDealias(tdt,"municipalities_column"))
