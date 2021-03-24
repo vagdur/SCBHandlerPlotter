@@ -16,12 +16,17 @@ test_that("Input validation of vectorSCB works", {
 
   # If we pass an argument to forceTable, it should be the name of a real table:
   expect_error(vectorSCB(vectorColumn=Age, forceTable="Not a real table name"))
-  # If we pass an argument to forceTable, the vectorColumn we passed should be in that table:
-  expect_error(vectorSCB(forceTable = "AgeGender", vectorColumn=NotARealColumn))
+  # If we pass an argument to forceTable, the vectorColumn we passed should be in that table. Whether we
+  # get an error or just a warning depends on the value of failIfUnable:
+  expect_error(vectorSCB(forceTable = "AgeGender", vectorColumn=NotARealColumn, failIfUnable = TRUE))
+  expect_warning(expect_identical(vectorSCB(forceTable = "AgeGender", vectorColumn=NotARealColumn, failIfUnable = FALSE), NA_real_))
 
-  # If we do not pass an argument to forceTable, our query has to actually be possible in some table:
-  expect_error(vectorSCB(vectorColumn=NotARealColumn, Age=25, Municipality="Ludvika"))
-  expect_error(vectorSCB(vectorColumn=Age, NotARealColumn=25, Municipality="Ludvika"))
+  # If we do not pass an argument to forceTable, our query has to actually be possible in some table. Whether we
+  # get an error or just a warning depends on the value of failIfUnable:
+  expect_error(vectorSCB(vectorColumn=NotARealColumn, Age=25, Municipality="Ludvika", failIfUnable = TRUE))
+  expect_warning(expect_identical(vectorSCB(vectorColumn=NotARealColumn, Age=25, Municipality="Ludvika", failIfUnable = FALSE), NA_real_))
+  expect_error(vectorSCB(vectorColumn=Age, NotARealColumn=25, Municipality="Ludvika", failIfUnable = TRUE))
+  expect_warning(expect_identical(vectorSCB(vectorColumn=Age, NotARealColumn=25, Municipality="Ludvika", failIfUnable = FALSE), NA_real_))
 
   # If our query works in multiple tables, we expect an error, since there is no collisionHandlingMode implemented yet:
   expect_error(vectorSCB(vectorColumn=Municipality))

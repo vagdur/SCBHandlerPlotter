@@ -427,6 +427,13 @@ setValidity("DocumentedTable", function(object) {
   # Everything was okay, so we return TRUE:
   return(TRUE)
 })
+
+# It is useful for objects of this class to show compactly, instead of vomiting out the result of show() on each
+# of its slots:
+setMethod("show", "DocumentedTable", function(object) {
+  cat(paste("A DocumentedTable object named",name(object),"containing",length(tableColumns(object)),"columns."))
+})
+
 # Define setter and getter methods: (I hate how un-DRY this code is... Might be possible to just do this with some fancy meta-programming?)
 setGeneric("description", function(x) standardGeneric("description"))
 setGeneric("description<-", function(x, value) standardGeneric("description<-"))
@@ -486,31 +493,45 @@ setMethod("valueColumn<-","DocumentedTable", function(x, value) {
 })
 
 # Define columnDealias:
-setGeneric("columnDealias", function(x, toDealias) standardGeneric("columnDealias"))
-setMethod("columnDealias", "DocumentedTable", function(x, toDealias) {
-  # As before, we use this slight hack to easily vectorise the function, and the rest of the code
-  # can pretend like the arguments we got were x and str:
-  unname(unlist(sapply(toDealias, function(str) {
-    # This is essentially a copy-paste of the code for levelDealias -- perhaps another argument
-    # to try to code this with multiple-inheritance from a "dealiasable" class as well as the
-    # normal inheritance? Worth thinking about.
+setGeneric("columnDealias", function(x, toDealias, getColumn = FALSE) standardGeneric("columnDealias"))
+setMethod("columnDealias", "DocumentedTable", function(x, toDealias, getColumn = FALSE) {
+  # If toDealias is an empty vector, then there is nothing to be done: We won't find any
+  # columns, since there is nothing to look for, so we return our default failure value,
+  # NULL:
 
+  if (length(toDealias) == 0) {
+    return(NULL)
+  }
+
+  result <- lapply(toDealias, function(str) {
     # We try to dealias str against every column, and then see if it succeeded zero times (in
-    # which case we return NULL), once (in which case we return the value of that success), or
-    # more than once, in which case we throw an error since we couldn't find an unambiguous
-    # result but really should be able to if the table is set up right.
+    # which case we return NULL), once (in which case we return the value of that success, or
+    # the column that succeeded if getColumn is TRUE), or more than once, in which case we throw
+    # an error since we couldn't find an unambiguous result but really should be able to if the
+    # table is set up right.
 
-    dealiasingResults <- unname(unlist(sapply(x@tableColumns, function(col) {
-      dealias(col, str)
-    })))
-    if (is.null(dealiasingResults)) {
+    # We actually cheat a little bit, to make our algorithm simpler: We always run as if getColumn
+    # were true, and then if it is false, we do sapply(result, name) to get the names and return
+    # that.
+
+    dealiasingResults <- lapply(x@tableColumns, function(col) {
+      dealiasResult <- dealias(col, str)
+      if (is.null(dealiasResult)) {
+        NULL
+      } else {
+        col
+      }
+    })
+
+    # Since the above was a lapply, we get a list with a bunch of NULLs in it. We remove those:
+    dealiasingResults <- dealiasingResults[-which(sapply(dealiasingResults, is.null))]
+
+    # Now, we check how many columns were able to dealias that name:
+    if (length(dealiasingResults) == 0) {
       # So none of the columns could dealias it, so we return NULL:
       NULL
     } else if (length(dealiasingResults) == 1) {
-      # WARNING: For some reason, if we return dealiasingResults, it pops out as an n x 1 matrix, but inside the actual function,
-      # it is as expected just a vector. This is very surprising, but borne out by inserting a browser() right after the sapply.
-      # I wonder why R does that to the return value?
-      dealiasingResults[1]
+      dealiasingResults[[1]]
     } else if (length(dealiasingResults) > 1) {
       # More than one column succeeded in dealiasing! This should not happen -- in a table constructed from an XML file
       # that has been tested, this is impossible. We throw an error.
@@ -521,7 +542,32 @@ setMethod("columnDealias", "DocumentedTable", function(x, toDealias) {
       stop("Reached case in conditional that should not be reachable. This should never run, so something weird has happened.")
       # Since this case should be completely impossible, so should writing a test that hits it. Thus we exclude it from test coverage stats.
     } # nocov end
-  })))
+  })
+
+  # Since the above was a lapply, we get a list which might contain a bunch of NULLs. We want to remove those.
+  # The naive approach would be to just run:
+  #result <- result[-which(sapply(result, is.null))]
+  # This, however, will not work: For some reason, if there is no NULL, the which() will return integer(0),
+  # and instead of the expected outcome of result[-integer(0)] -- doing nothing, since we supplied an empty
+  # list of arguments to remove, we for some reason get the empty list back. So we need to first check if there
+  # are any null elements, and only then remove them:
+  nullResults <- which(sapply(result, is.null))
+  if (length(nullResults) >  0) {
+    result <- result[-nullResults]
+  }
+
+  # If no column succeeded, we are expected to return NULL:
+  if (length(result) == 0) {
+    return(NULL)
+  }
+
+  # If we want to return the actual Column objects, we can just return result,
+  # otherwise, we sapply name to result to get a vector of column names instead:
+  if (getColumn) {
+    return(result)
+  } else {
+    return(sapply(result, name))
+  }
 })
 
 # Define canHandleQuery:

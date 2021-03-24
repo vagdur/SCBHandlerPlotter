@@ -4,14 +4,22 @@
 \alias{vectorSCB}
 \title{Vectorise a call to SCB}
 \usage{
-vectorSCB(vectorColumn, verbose = FALSE, forceTable = NA_character_, ...)
+vectorSCB(
+  vectorColumn,
+  verbose = FALSE,
+  forceTable = NA_character_,
+  failIfUnable = FALSE,
+  ...
+)
 }
 \arguments{
 \item{vectorColumn}{Which column should be vectorised over. This argument should not be quoted, just write it straight up. See examples.}
 
-\item{verbose}{Causes some extra messages to be printed explaining what is happening in the calls to downstream functions.}
+\item{verbose}{Causes some extra messages to be printed explaining what is happening. If you are getting unexpected results, try setting this to TRUE first.}
 
 \item{forceTable}{Directs the query to a specific table, in case your query does not uniquely determine a table.}
+
+\item{failIfUnable}{If the query cannot be handled by our tables, should we throw an error, or just a warning and return NA? TRUE gives errors, FALSE gives warnings.}
 
 \item{...}{Your query, see documentation of SCB() for syntax for this.}
 }
@@ -20,16 +28,13 @@ A named vector whose elements are results from SCB() and names are the level of 
 }
 \description{
 This function provides vectorisation of the SCB function -- it is effectively equivalent
-to just doing it yourself with an sapply call, but makes for slightly neater code. Plus, there
-are some cases where this is not easy to do with a sapply -- implementing this function in full
-generality requires a bit of metaprogramming, which one probably doesn't want to do when writing
-a script...
+to just doing it yourself with an sapply call, but it is considerably faster, since it doesn't have
+to run query() once per level you're vectorising over.
 It is called precisely like \code{SCB()} for the query, but its other parameters are different.
-The central one is vectorColumn which should be set to the name of a column. The function then looks at if you
-provided a list of values for that column: If you did, the function runs SCB() on each of those values, otherwise,
-if you omitted that column, it looks up what all of its possible values are, and vectorises over
-those.
-The verbose parameter still exists, with the same effect, but failIfUnable and errorHandlingMode are not supported.
+The central one is vectorColumn which should be set to the name of a column. The function then looks at whether you
+provided a list of values for that column: If you did, the function runs your query on each of those values, otherwise,
+if you omitted that column, it looks up what all of its possible values are, and vectorises over those.
+The verbose and failIfUnable parameters still exist, with the same effect, but collisionHandlingMode is not supported.
 }
 \examples{
 # How much forest is there in each municipality in Sweden?:
