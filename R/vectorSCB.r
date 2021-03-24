@@ -116,11 +116,10 @@ setMethod("vectorQuery", "DocumentedTable", function(x, vectorColumn, verbose=FA
 #' generality requires a bit of metaprogramming, which one probably doesn't want to do when writing
 #' a script...
 #' It is called precisely like \code{SCB()} for the query, but its other parameters are different.
-#' The central one is vectorColumn which should be set to the name of a column. The function then looks at if you
-#' provided a list of values for that column: If you did, the function runs SCB() on each of those values, otherwise,
-#' if you omitted that column, it looks up what all of its possible values are, and vectorises over
-#' those.
-#' The verbose parameter still exists, with the same effect, but failIfUnable and errorHandlingMode are not supported.
+#' The central one is vectorColumn which should be set to the name of a column. The function then looks at whether you
+#' provided a list of values for that column: If you did, the function runs your query on each of those values, otherwise,
+#' if you omitted that column, it looks up what all of its possible values are, and vectorises over those.
+#' The verbose and failIfUnable parameters still exist, with the same effect, but collisionHandlingMode is not supported.
 #'
 #' @param vectorColumn Which column should be vectorised over. This argument should not be quoted, just write it straight up. See examples.
 #' @param verbose Causes some extra messages to be printed explaining what is happening. If you are getting unexpected results, try setting this to TRUE first.

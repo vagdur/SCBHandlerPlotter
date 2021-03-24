@@ -33,11 +33,10 @@ are some cases where this is not easy to do with a sapply -- implementing this f
 generality requires a bit of metaprogramming, which one probably doesn't want to do when writing
 a script...
 It is called precisely like \code{SCB()} for the query, but its other parameters are different.
-The central one is vectorColumn which should be set to the name of a column. The function then looks at if you
-provided a list of values for that column: If you did, the function runs SCB() on each of those values, otherwise,
-if you omitted that column, it looks up what all of its possible values are, and vectorises over
-those.
-The verbose parameter still exists, with the same effect, but failIfUnable and errorHandlingMode are not supported.
+The central one is vectorColumn which should be set to the name of a column. The function then looks at whether you
+provided a list of values for that column: If you did, the function runs your query on each of those values, otherwise,
+if you omitted that column, it looks up what all of its possible values are, and vectorises over those.
+The verbose and failIfUnable parameters still exist, with the same effect, but collisionHandlingMode is not supported.
 }
 \examples{
 # How much forest is there in each municipality in Sweden?:
