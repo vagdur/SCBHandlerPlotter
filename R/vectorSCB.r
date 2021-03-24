@@ -146,10 +146,8 @@ setMethod("vectorQuery", "DocumentedTable", function(x, vectorColumn, verbose=FA
 #' Vectorise a call to SCB
 #'
 #' This function provides vectorisation of the SCB function -- it is effectively equivalent
-#' to just doing it yourself with an sapply call, but makes for slightly neater code. Plus, there
-#' are some cases where this is not easy to do with a sapply -- implementing this function in full
-#' generality requires a bit of metaprogramming, which one probably doesn't want to do when writing
-#' a script...
+#' to just doing it yourself with an sapply call, but it is considerably faster, since it doesn't have
+#' to run query() once per level you're vectorising over.
 #' It is called precisely like \code{SCB()} for the query, but its other parameters are different.
 #' The central one is vectorColumn which should be set to the name of a column. The function then looks at whether you
 #' provided a list of values for that column: If you did, the function runs your query on each of those values, otherwise,
