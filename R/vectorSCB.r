@@ -78,6 +78,10 @@ setMethod("vectorQuery", "DocumentedTable", function(x, vectorColumn, verbose=FA
   # Let's store our user input in a better variable than ...: (And also force them all to be evaluated.)
   passedParameters <- list(...)
 
+  # And dealias the vectorColumn the user gave us:
+  vectorColumnObject <- columnDealias(x, vectorColumn, getColumn = TRUE)[[1]]
+  dealiasedVectorColumn <- name(vectorColumnObject)
+
   # Second, we need to determine what levels of the vectorColumn to vector over:
   if (vectorColumn %in% names(passedParameters)) {
     # The user passed us a list of things to vector over in the "...". We move that over to its own special variable,
@@ -87,23 +91,54 @@ setMethod("vectorQuery", "DocumentedTable", function(x, vectorColumn, verbose=FA
   } else {
     # We did not get an explicit list of things to vector over, so we assume we should vector over all levels of the column.
     # First dealias the name of the vectorColumn:
-    dealiasedVectorColumn <- columnDealias(x, vectorColumn)
     levelsToVectorOver <- sort(unique(x@csvData[, dealiasedVectorColumn]))
   }
 
   # Having determined what to vector over, it is time to actually find the data the user wants:
 
-  queryResults <- sapply(levelsToVectorOver, function(level) {
-    # What we need to do is construct our query to query() and then call it using do.call:
-    callArguments <- list(...)
-    callArguments[[vectorColumn]] <- level
-    callArguments$checkHandleable <- FALSE
-    callArguments$verbose <- verbose
-    callArguments$x <- x
+  # We do this in two steps:
+  #   1.  We subset our table's CSV data down to only the rows which we are interested in, as in
+  #       a normal query()
+  #   2.  Instead of just summing the valueColumn -- which would give an unvectorised result -- we
+  #       create a list in which to store our output, and loop over the remaining row. For each row,
+  #       we check the value of the vectorColumn, and add the value of the valueColumn to the corresponding
+  #       entry of the output list. This evades the need to run subset() once per level we want to vector over,
+  #       as the naive algorithm of just doing a sapply would -- so this should be much faster.
 
-    do.call("query", callArguments)
-  })
-  # Then we attach the right names to the result and hand it back to the user:
+
+  # The first thing to do in step one is grab our list of columns and levels from ... and dealias them
+  # into something our CSV can handle:
+  columnNames <- names(list(...))
+  columnLevels <- list(...)
+  # Now we use the getColumn=TRUE mode of columnDealias to get the column objects themselves, so we can
+  # immediately dealias the levels we were passed against them:
+  queryColumns <- columnDealias(x, columnNames, getColumn=TRUE)
+  for (i in c(1:length(columnLevels))) {
+    columnLevels[[i]] <- levelDealias(queryColumns[[i]], columnLevels[[i]])
+  }
+  # So now we have dealiased all columns and all levels. Time to create the subset of data specified by our columns
+  # other than the vectorColumn: (Or actually including the vectorColumn, if we are only vectoring over a subset of
+  # its levels.) We do this one column at a time.
+  runningSubset <- csvData(x)
+  for (i in c(1:length(queryColumns))) {
+    rowsToKeep <- runningSubset[, name(queryColumns[[i]])] %in% columnLevels[[i]]
+    runningSubset <- runningSubset[rowsToKeep,]
+  }
+
+  # Having created this subset, we are ready to proceed to step two.
+  queryResults <- rep(0, length(levelsToVectorOver))
+  names(queryResults) <- levelDealias(vectorColumnObject, levelsToVectorOver)
+
+  for (i in c(1:nrow(runningSubset))) {
+    # First, let's figure out which level the current row is:
+    currentRowLevel <- as.character(runningSubset[i, dealiasedVectorColumn])
+    # Then, to the corresponding entry of queryResults, we add in the value of the valueColumn
+    # for this row
+    queryResults[currentRowLevel] <- queryResults[currentRowLevel] + runningSubset[i, valueColumn(x)]
+  }
+
+  # Finally, we set the names of the output to the names the user used, instead of the dealiased names:
+  # (This only has an effect if the user supplied us a list of vectors to level over.)
   names(queryResults) <- levelsToVectorOver
   return(queryResults)
 })
