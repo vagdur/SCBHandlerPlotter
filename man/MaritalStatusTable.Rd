@@ -15,4 +15,5 @@ A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinno
 A column of factor data. Its levels are: ogifta (a.k.a.: Unmarried, Never married, Ogifta, Aldrig gifta.), gifta (a.k.a.: Married, Gifta.), skilda (a.k.a.: Divorced, Skilda.), änkor/änklingar (a.k.a.: WidowErs, Änk(or/lingar), Spouse deceased.).}
 }}
 \description{A table containing data on marital status, divided by age, gender, and municipality. Note that in the column Age, the value 100 actually represents all ages above 99.}
+\source{SCB: Folkmängden efter region, civilstånd, ålder och kön. År 1968 - 2020, 2020}
 \keyword{datasets}

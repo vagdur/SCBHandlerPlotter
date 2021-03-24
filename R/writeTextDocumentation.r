@@ -105,10 +105,14 @@ writeTextDocumentation <- function(filename) {
   # We close the opening { of the \format{ and \describe{ tags:
   doc <- paste(doc,'}}\n',sep="")
 
-  # The final thing we need to add is the description and keyword 'datasets': (Things don't appear in this order when rendered, but this is
-  # the order Roxygen would put them, so we follow their ordering.)
+  # The final thing we need to add is the description, data source and year, and keyword 'datasets':
+  #(Things don't appear in this order when rendered, but this is the order Roxygen would put them, so we follow their ordering.)
   tableDescription <- docList$description[[1]][1]
-  doc <- paste(doc, '\\description{',tableDescription,'}\n\\keyword{datasets}',sep="")
+  tableDataSource <- docList$source[[1]][1]
+  tableDataYear <- docList$year[[1]][1]
+  doc <- paste(doc, '\\description{',tableDescription,'}\n', sep="")
+  doc <- paste(doc, '\\source{',tableDataSource,', ',tableDataYear,'}\n',sep="")
+  doc <- paste(doc, '\\keyword{datasets}',sep="")
 
   # Having created all the documentation, we now just return the string:
   return(doc)

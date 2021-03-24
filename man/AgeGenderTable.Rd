@@ -13,4 +13,5 @@ A range of numeric values, taking values between 0 and 100.}
 A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinnor (a.k.a.: Women, Kvinnor, Female.).}
 }}
 \description{A table containing data on population, divided by age, gender, and municipality.}
+\source{SCB, 2019}
 \keyword{datasets}

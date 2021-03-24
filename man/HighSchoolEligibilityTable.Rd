@@ -15,4 +15,5 @@ A column of factor data. Its levels are: Kommunal (a.k.a.: Municipal.), Enskild 
 A column of factor data. Its levels are: Eligible (a.k.a.: Gymnasiebehöriga, True, Behöriga.), Ineligible (a.k.a.: Gymnasieobehöriga, False, Obehöriga.), Total (a.k.a.: Samtliga, All.).}
 }}
 \description{A table containing data on how many students graduated ninth grade, and what proportion were eligible for high school, divided by gender and organizational form (municipal or private). The original data reported total number of students and percentage ineligible for any high school program, thus the non-integer numbers of students. See the data source for more detail. Note that values less than ten for total number of students are rounded to zero, and if there are less than five ineligible students, the percentage of ineligible students was rounded to 0.}
+\source{Skolverket: https://bit.ly/394Xtiz, School year 2018/2019}
 \keyword{datasets}

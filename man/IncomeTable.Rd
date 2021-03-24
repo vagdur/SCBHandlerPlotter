@@ -15,4 +15,5 @@ A column of factor data. Its levels are: män (a.k.a.: Men, Män, Male.), kvinno
 A column of factor data. Its levels are: Medelvärde (a.k.a.: Mean.), Median.}
 }}
 \description{A table containing data on mean and median income, divided by gender and some age categories.}
+\source{SCB, 2018}
 \keyword{datasets}

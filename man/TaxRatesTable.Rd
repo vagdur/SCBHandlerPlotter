@@ -11,4 +11,5 @@ Municipality the observation is from.}
 A column of factor data. Its levels are: Kommun (a.k.a.: Municipal.), Region (a.k.a.: Regional.).}
 }}
 \description{A table containing data on municipal and regional tax rates.}
+\source{SCB, 2019}
 \keyword{datasets}
