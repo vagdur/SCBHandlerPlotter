@@ -23,8 +23,8 @@ to see this in action.
 
 The library can be installed using
 
-    devtools::install_github("vagdur/SCBHandlerPlotter")
-    
+    devtools::install_github("vagdur/SCBHandlerPlotter", ref = "1.0.0")
+for the latest stable version, or omit the "ref" part for the current state on GitHub (I offer no guarantees that that state is desirable).
 ## Data sources
 
 All tables except one are from SCB, one is from Skolverket. The map of Sweden is from SCB, via the package [swemaps](https://github.com/reinholdsson/swemaps).
