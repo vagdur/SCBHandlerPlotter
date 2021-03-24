@@ -495,8 +495,14 @@ setMethod("valueColumn<-","DocumentedTable", function(x, value) {
 # Define columnDealias:
 setGeneric("columnDealias", function(x, toDealias, getColumn = FALSE) standardGeneric("columnDealias"))
 setMethod("columnDealias", "DocumentedTable", function(x, toDealias, getColumn = FALSE) {
-  # As before, we use this slight hack to easily vectorise the function, and the rest of the code
-  # can pretend like the arguments we got were x and str:
+  # If toDealias is an empty vector, then there is nothing to be done: We won't find any
+  # columns, since there is nothing to look for, so we return our default failure value,
+  # NULL:
+
+  if (length(toDealias) == 0) {
+    return(NULL)
+  }
+
   result <- lapply(toDealias, function(str) {
     # We try to dealias str against every column, and then see if it succeeded zero times (in
     # which case we return NULL), once (in which case we return the value of that success, or
@@ -504,20 +510,16 @@ setMethod("columnDealias", "DocumentedTable", function(x, toDealias, getColumn =
     # an error since we couldn't find an unambiguous result but really should be able to if the
     # table is set up right.
 
+    # We actually cheat a little bit, to make our algorithm simpler: We always run as if getColumn
+    # were true, and then if it is false, we do sapply(result, name) to get the names and return
+    # that.
+
     dealiasingResults <- lapply(x@tableColumns, function(col) {
       dealiasResult <- dealias(col, str)
-      if (!getColumn) {
-        # If the user doesn't want the actual Column object, we just return the output of dealias
-        # in this lapply:
-        dealiasResult
+      if (is.null(dealiasResult)) {
+        NULL
       } else {
-        # If the user wants the actual column, we check if the dealiasing succeeded, and if it did,
-        # we return the column itself in this lapply:
-        if (is.null(dealiasResult)) {
-          NULL
-        } else {
-          col
-        }
+        col
       }
     })
 
@@ -542,12 +544,29 @@ setMethod("columnDealias", "DocumentedTable", function(x, toDealias, getColumn =
     } # nocov end
   })
 
-  # If we want to return the actual Column objects, they need to be in a list,
-  # otherwise, the user wants a vector, and we give that to them:
+  # Since the above was a lapply, we get a list which might contain a bunch of NULLs. We want to remove those.
+  # The naive approach would be to just run:
+  #result <- result[-which(sapply(result, is.null))]
+  # This, however, will not work: For some reason, if there is no NULL, the which() will return integer(0),
+  # and instead of the expected outcome of result[-integer(0)] -- doing nothing, since we supplied an empty
+  # list of arguments to remove, we for some reason get the empty list back. So we need to first check if there
+  # are any null elements, and only then remove them:
+  nullResults <- which(sapply(result, is.null))
+  if (length(nullResults) >  0) {
+    result <- result[-nullResults]
+  }
+
+  # If no column succeeded, we are expected to return NULL:
+  if (length(result) == 0) {
+    return(NULL)
+  }
+
+  # If we want to return the actual Column objects, we can just return result,
+  # otherwise, we sapply name to result to get a vector of column names instead:
   if (getColumn) {
     return(result)
   } else {
-    return(unname(unlist(result)))
+    return(sapply(result, name))
   }
 })
 
